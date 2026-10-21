@@ -2,7 +2,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.linkedin.android.spyglass.mentions.Mentionable;
 

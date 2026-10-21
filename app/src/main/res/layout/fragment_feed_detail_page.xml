@@ -7,7 +7,7 @@
     android:background="@color/white">
 
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/feed_detail_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
@@ -106,7 +106,7 @@
 
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/feed_detail_recyc"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -114,7 +114,7 @@
         android:layout_below="@id/feed_detail_toolbar"
     />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/feed_detail_mentions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -2,7 +2,7 @@ package com.linute.linute.SquareCamera;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Created by desmond on 4/10/15.

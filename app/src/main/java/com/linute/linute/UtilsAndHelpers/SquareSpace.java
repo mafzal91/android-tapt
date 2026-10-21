@@ -1,7 +1,7 @@
 package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
-import android.support.v4.widget.Space;
+import android.widget.Space;
 import android.util.AttributeSet;
 
 /**

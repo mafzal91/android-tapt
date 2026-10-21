@@ -1,7 +1,7 @@
 package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
-import android.support.annotation.DrawableRes;
+import androidx.annotation.DrawableRes;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 

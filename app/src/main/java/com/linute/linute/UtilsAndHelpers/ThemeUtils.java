@@ -5,7 +5,7 @@ package com.linute.linute.UtilsAndHelpers;
  */
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.design.R;
+import com.google.android.material.R;
 
 class ThemeUtils {
 

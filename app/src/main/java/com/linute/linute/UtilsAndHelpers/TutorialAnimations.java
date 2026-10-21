@@ -6,9 +6,9 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.design.widget.NavigationView;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.RecyclerView;
+import com.google.android.material.navigation.NavigationView;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;

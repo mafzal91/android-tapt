@@ -7,7 +7,7 @@
     tools:context=".MainContent.Chat.SelectUsersFragment">
 
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/search_user_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -27,14 +27,14 @@
 
 
 
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_selected"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_search"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

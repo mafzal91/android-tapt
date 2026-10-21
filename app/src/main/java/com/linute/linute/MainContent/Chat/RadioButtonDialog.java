@@ -2,7 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Created by mikhail on 7/23/16.

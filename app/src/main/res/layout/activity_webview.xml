@@ -3,11 +3,11 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
-    <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
+    <com.google.android.material.appbar.AppBarLayout android:layout_width="match_parent"
                                                 android:layout_height="wrap_content">
         <include android:id="@+id/webviewactivity_toolbar"
                  layout="@layout/tool_bar"/>
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <ProgressBar android:id="@+id/progress_bar"
                  style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"

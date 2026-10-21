@@ -5,12 +5,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
-import android.support.v4.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -47,12 +47,12 @@ import okhttp3.Response;
 public class PreLoginActivity extends AppCompatActivity {
 
     /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * The {@link androidx.viewpager.widget.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
      * {@link FragmentPagerAdapter} derivative, which will keep every
      * loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     * {@link androidx.fragment.app.FragmentStatePagerAdapter}.
      */
 
     public static String TAG = PreLoginActivity.class.getSimpleName();

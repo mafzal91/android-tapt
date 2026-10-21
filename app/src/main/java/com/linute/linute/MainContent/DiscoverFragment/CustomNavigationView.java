@@ -1,7 +1,7 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
-import android.support.design.widget.NavigationView;
+import com.google.android.material.navigation.NavigationView;
 import android.util.AttributeSet;
 
 /**

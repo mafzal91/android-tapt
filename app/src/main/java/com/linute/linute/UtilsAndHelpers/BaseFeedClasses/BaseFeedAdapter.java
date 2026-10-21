@@ -1,6 +1,6 @@
 package com.linute.linute.UtilsAndHelpers.BaseFeedClasses;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 
 import com.bumptech.glide.RequestManager;

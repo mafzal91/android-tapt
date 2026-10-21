@@ -2,7 +2,7 @@ package com.linute.linute.MainContent.EditScreen.Tools;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v7.widget.SwitchCompat;
+import androidx.appcompat.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

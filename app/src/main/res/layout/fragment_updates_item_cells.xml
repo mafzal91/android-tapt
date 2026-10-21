@@ -55,7 +55,7 @@
                 android:textSize="@dimen/header_font_size"
                 tools:text="FIRST LAST"/>
 
-            <android.support.v4.widget.Space
+            <android.widget.Space
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

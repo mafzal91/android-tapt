@@ -5,7 +5,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.support.v4.widget.Space;
+import android.widget.Space;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
