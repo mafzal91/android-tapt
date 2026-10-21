@@ -1271,7 +1271,10 @@ public class EditFragment extends BaseFragment {
                             MediaMetadataRetriever media = new MediaMetadataRetriever();
                             media.setDataSource(outputFile);
                             Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
-                            media.release();
+                            try {
+                                media.release();
+                            } catch (IOException ignored) {
+                            }
 
                             ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
                             subscriber.onNext(image);

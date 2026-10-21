@@ -392,7 +392,7 @@ public class MainActivity extends BaseTaptActivity {
             loadDrawerHeader(); //reload drawer header
         } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
             Intent intent = new Intent(this, UploadIntentService.class);
-            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
+            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, (android.os.Parcelable) data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
             startService(intent);
         }
         super.onActivityResult(requestCode, resultCode, data);

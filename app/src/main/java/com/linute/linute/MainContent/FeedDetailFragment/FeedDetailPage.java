@@ -1541,7 +1541,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                             (com.getCommentUserId() == null || !com.getCommentUserId().equals(mViewId))) {
 
                                         mNewCommentSnackbar = Snackbar.make(mCommentEditText, (mNewCommentCount > 1 ? mNewCommentCount + " New Comments" : "New Comment"), Snackbar.LENGTH_LONG);
-                                        TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
+                                        TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
                                         snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                                         snackbarTV.setGravity(Gravity.CENTER);
