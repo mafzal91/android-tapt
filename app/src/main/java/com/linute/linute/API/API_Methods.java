@@ -2,6 +2,7 @@ package com.linute.linute.API;
 
 import android.os.Build;
 
+import com.linute.linute.BuildConfig;
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -38,14 +39,14 @@ public class API_Methods {
 
 
     // API ENDPOINT URL
-    public static final String SCHEME = "https";
+    // Set in app/build.gradle; override per build type or from gradle.properties.
+    public static final String SCHEME = BuildConfig.API_SCHEME;
 
-    //    public static String HOST = "api.tapt.io";
-    public static final String HOST_DEV = "devapi.tapt.io";
-    public static final String HOST_LIVE = "api.tapt.io";
+    public static final String HOST_DEV = BuildConfig.API_HOST_DEV;
+    public static final String HOST_LIVE = BuildConfig.API_HOST_LIVE;
 
-    public static final String VERSION_DEV = "v1.4.8";
-    public static final String VERSION_LIVE = "v1.4.7";
+    public static final String VERSION_DEV = BuildConfig.API_VERSION;
+    public static final String VERSION_LIVE = BuildConfig.API_VERSION;
 
     //set default to live, just in case
     public static String HOST = HOST_LIVE;

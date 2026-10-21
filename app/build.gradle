@@ -13,6 +13,13 @@ android {
         versionName "1.7.7.1"
         multiDexEnabled true
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
+
+        // Backend. Override any of these in ~/.gradle/gradle.properties or with
+        // -Ptapt.apiHost=... to point a build at a local server.
+        buildConfigField "String", "API_SCHEME", "\"${findProperty('tapt.apiScheme') ?: 'https'}\""
+        buildConfigField "String", "API_HOST_LIVE", "\"${findProperty('tapt.apiHost') ?: 'api.tapt.mafz.al'}\""
+        buildConfigField "String", "API_HOST_DEV", "\"${findProperty('tapt.apiHostDev') ?: findProperty('tapt.apiHost') ?: 'api.tapt.mafz.al'}\""
+        buildConfigField "String", "API_VERSION", "\"${findProperty('tapt.apiVersion') ?: 'v1.4.8'}\""
     }
     buildFeatures {
         buildConfig true
