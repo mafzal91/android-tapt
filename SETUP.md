@@ -123,24 +123,24 @@ password `pass1234`, which is the quickest way to get an account to log in with.
   so it answers 500), push, sign-up past the college step (see Backend
   requests), video recording and the FFmpeg path.
 
-## Old domains still referenced (for the owner)
+## Domains and names
 
-These point at the dead `tapt.io` domain. They were left unchanged because the
-new URLs aren't known yet:
+`linute.com` and `tapt.io` are gone. The app now uses:
 
-- `support@tapt.io`
-  - `MainContent/MainActivity.java` (FiveStarsDialog feedback address)
-  - `LoginAndSignup/PreLoginActivity.java` (help email on the login screen)
-  - `UtilsAndHelpers/FiveStarRater/FiveStarsDialog.java` (fallback address)
-  - `res/values/strings.xml`, the account-deletion text
-- `https://www.tapt.io/terms-of-service` and `https://www.tapt.io/privacy-policy`
-  - `LoginAndSignup/PreloginChoicesFragment.java`
-  - `MainContent/Settings/SettingActivity.java`
+- `api.tapt.mafz.al` for REST and Socket.IO
+- `media.tapt.mafz.al` for media
+- `https://www.tapt.mafz.al/terms-of-service` and `/privacy-policy`, served by
+  the backend's www app
+- `support@tapt.mafz.al`, the backend's `config.email.support`, for the
+  feedback, help and account-deletion emails
+
+Kept on purpose:
+
+- The `linute://…/view/<id>` deep-link scheme. It is app-local, and the
+  backend generates these links (`models/activities.js`).
+- The Java package `com.linute.linute`. The installed app id is `al.mafz.tapt`.
 - `MainContent/Global/GlobalFragment.java` has a hard-coded 2016 sample
   article with a `ccnycampus.org` image. It is test data and harmless.
-
-The `linute://article` deep-link scheme in the manifest is app-local, so it
-still works.
 
 ## Backend requests
 
