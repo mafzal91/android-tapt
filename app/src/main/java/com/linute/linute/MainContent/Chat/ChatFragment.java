@@ -692,7 +692,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
 
         mSocket.on("new message", onNewMessage);
         mSocket.on("typing", onTyping);
@@ -902,10 +901,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             mSocket.emit(API_Methods.VERSION + ":messages:left", joinLeft);
 
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
 
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.off("new message", onNewMessage);
             mSocket.off("typing", onTyping);
             mSocket.off("stop typing", onStopTyping);

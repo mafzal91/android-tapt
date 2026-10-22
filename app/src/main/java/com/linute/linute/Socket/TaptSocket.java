@@ -15,9 +15,12 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 import io.socket.client.IO;
+import io.socket.client.Manager;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
@@ -63,16 +66,16 @@ public class TaptSocket {
                 }
             }
 
-            op.query = "token=" + token +
-                    "&deviceToken=" + device.getDeviceToken() +
-                    "&udid=" + device.getUdid() +
-                    "&version=" + device.getVersionName() +
-                    "&build=" + device.getVersionCode() +
-                    "&os=" + device.getOS() +
-                    "&platform=" + device.getType() +
-                    "&api=" + API_Methods.VERSION +
-                    "&model=" + device.getModel() +
-                    "&geo=" + coord;
+            op.query = "token=" + encode(token) +
+                    "&deviceToken=" + encode(device.getDeviceToken()) +
+                    "&udid=" + encode(device.getUdid()) +
+                    "&version=" + encode(device.getVersionName()) +
+                    "&build=" + encode(device.getVersionCode()) +
+                    "&os=" + encode(device.getOS()) +
+                    "&platform=" + encode(device.getType()) +
+                    "&api=" + encode(API_Methods.VERSION) +
+                    "&model=" + encode(device.getModel()) +
+                    "&geo=" + encode(coord.toString());
 
             op.reconnectionDelay = 5;
             op.secure = true;
@@ -81,6 +84,17 @@ public class TaptSocket {
             mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
         } catch (URISyntaxException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Query values such as the device model ("Pixel 8") and geo ("[40.7,-74.0]")
+    // contain characters that are not valid in a URI.
+    private static String encode(String value) {
+        if (value == null) return "";
+        try {
+            return URLEncoder.encode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -133,6 +147,15 @@ public class TaptSocket {
 
     public void off(String event, Emitter.Listener listener) {
         mSocket.off(event, listener);
+    }
+
+    // In socket.io-client 2.x reconnect events come from the Manager, not the Socket.
+    public void onReconnect(Emitter.Listener listener) {
+        mSocket.io().on(Manager.EVENT_RECONNECT, listener);
+    }
+
+    public void offReconnect(Emitter.Listener listener) {
+        mSocket.io().off(Manager.EVENT_RECONNECT, listener);
     }
 
     public void emit(String event, Object arg) {

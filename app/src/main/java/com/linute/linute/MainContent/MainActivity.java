@@ -599,9 +599,8 @@ public class MainActivity extends BaseTaptActivity {
         socket.on("message", message);
         socket.on("alert", alert);
         socket.on("modes disabled", modesDisabled);
-        socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        socket.on(Socket.EVENT_ERROR, onEventError);
-        socket.on(Socket.EVENT_RECONNECT, onReconnect);
+        socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        socket.onReconnect(onReconnect);
         socket.connectSocket();
 
         //get friends list
@@ -666,9 +665,7 @@ public class MainActivity extends BaseTaptActivity {
             socket.off("alert", alert);
             socket.off("modes disabled", modesDisabled);
             socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            socket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
-            socket.off(Socket.EVENT_ERROR, onEventError);
-            socket.off(Socket.EVENT_RECONNECT, onReconnect);
+            socket.offReconnect(onReconnect);
         }
     }
 
@@ -682,6 +679,13 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             Log.d(TAG, "call: failed socket connection");
+            // Socket.IO 3+ reports a server-side rejection (e.g. the auth
+            // middleware) as connect_error with a JSON payload, where the old
+            // protocol sent an "error" event. Transport failures carry an
+            // exception instead and are retried silently, as before.
+            if (args.length > 0 && args[0] instanceof JSONObject) {
+                onEventError.call(args);
+            }
         }
     };
 
