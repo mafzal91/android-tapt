@@ -26,14 +26,14 @@ Nothing secret is committed. Set these outside the repo.
 
 | What | Where | Without it |
 |---|---|---|
-| `tapt.mediaUrl` | `~/.gradle/gradle.properties` or `-Ptapt.mediaUrl=...` | Build warns. Images and videos don't load. |
+| `tapt.mediaUrl` | `~/.gradle/gradle.properties` or `-Ptapt.mediaUrl=...` | Default: `https://media.tapt.mafz.al`. |
 | `app/google-services.json` | Download from the Firebase console (gitignored) | Build warns. Push is off; everything else works. |
 | `tapt.apiHost`, `tapt.apiHostDev`, `tapt.apiScheme`, `tapt.apiVersion` | Same as `tapt.mediaUrl` | Defaults: `https`, `api.tapt.mafz.al`, `v1.4.8`. |
 
 ### `tapt.mediaUrl`
 
-This is the backend's `MEDIA_URL`: the HTTPS base of the S3 bucket, with no
-trailing slash, for example `https://<bucket>.s3.amazonaws.com`. The server
+This is the backend's `MEDIA_URL`: the public domain of the R2 bucket, with no
+trailing slash. It defaults to `https://media.tapt.mafz.al`. The server
 stores only file names. The app adds this base and a folder (see
 `UtilsAndHelpers/Utils.java`):
 
@@ -149,12 +149,17 @@ Things the app needs from the server. The backend session picks these up.
       socket.io-client 2.1.2, which speaks Engine.IO v4 natively.
 - [ ] Give production Firebase service-account credentials
       (`GOOGLE_APPLICATION_CREDENTIALS`) for the project above.
-- [ ] Fill the S3 bucket with the files the server's data refers to, under
+- [ ] Fill the R2 bucket (`media.tapt.mafz.al`) with the files the server's data refers to, under
       the folders listed above.
 - [ ] For the sign-up field lockdown: `POST /v1.4.8/users` (sign-up) sends
       `email`, `password`, `firstName`, `lastName`, `timeZone`, `college` and
       optionally `profileImage` (base64 JPEG). No request has been seen to fail
       yet. Bodies will be recorded here if one does.
+- [ ] Production has no searchable colleges, so nobody can sign up.
+      `GET https://api.tapt.mafz.al/v1.4.8/colleges?name=university&limit=2`
+      (also `a`, `new`, `college`, `hunter`) returns `{"colleges":[],...,"totalCount":0}`.
+      Expected: the colleges imported (`pnpm import-colleges`) with `keywords`
+      filled, or at least the colleges the friends need.
 - [ ] College search finds nothing for the seeded test colleges.
       `GET /v1.4.8/colleges?name=Test&limit=30` returns `{"colleges":[],...,"totalCount":0}`
       although "Test University" and "Smoke Test University" exist. The search
