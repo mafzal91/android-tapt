@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -232,12 +233,23 @@ public class MainActivity extends BaseTaptActivity {
     public static final int LOCATION_PERM = 82;
 
 
+    // Location and (Android 13+) notifications go in one request: Android
+    // rejects a second request while the first dialog is still showing.
     public void getPermission() {
+        ArrayList<String> missing = new ArrayList<>();
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && !ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            missing.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
 
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERM);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            missing.add(Manifest.permission.POST_NOTIFICATIONS);
+        }
 
+        if (!missing.isEmpty()) {
+            ActivityCompat.requestPermissions(this, missing.toArray(new String[0]), LOCATION_PERM);
         }/*else {
             *//*new AlertDialog.Builder(this)
                     .setTitle("Need location permission")
@@ -258,8 +270,11 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERM){
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                sendLocation();
+            for (int i = 0; i < permissions.length && i < grantResults.length; i++) {
+                if (Manifest.permission.ACCESS_FINE_LOCATION.equals(permissions[i])
+                        && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    sendLocation();
+                }
             }
         }else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -618,9 +633,8 @@ public class MainActivity extends BaseTaptActivity {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             sendLocation();
-        }else {
-            getPermission();
         }
+        getPermission();
     }
 
     /******

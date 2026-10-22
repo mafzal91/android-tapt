@@ -32,6 +32,7 @@ public class TaptSocket {
 
     private static final String TAG = TaptSocket.class.getSimpleName();
     private Socket mSocket;
+    private IO.Options mOptions;
 
     // counts how many Activities are using this connection
     // in Activity onResume, increment this
@@ -81,6 +82,7 @@ public class TaptSocket {
             op.secure = true;
             op.transports = new String[]{WebSocket.NAME};
 
+            mOptions = op;
             mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -136,6 +138,18 @@ public class TaptSocket {
         Log.d(TAG, "forceDisconnect: ");
     }
 
+
+    // The server registers the push token from the handshake query, so a new
+    // token only reaches it on the next connection.
+    public void updateDeviceToken(String deviceToken) {
+        if (mSocket == null) return;
+        // The Manager reads these options again on every (re)connect.
+        mOptions.query = mOptions.query.replaceFirst("deviceToken=[^&]*", "deviceToken=" + encode(deviceToken));
+        if (mSocket.connected()) {
+            mSocket.disconnect();
+            mSocket.connect();
+        }
+    }
 
     public static TaptSocket getInstance() {
         return mTaptSocket;

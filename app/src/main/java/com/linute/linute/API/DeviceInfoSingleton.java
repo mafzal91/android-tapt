@@ -62,6 +62,10 @@ public class DeviceInfoSingleton {
         return mDeviceToken;
     }
 
+    public void setDeviceToken(String deviceToken) {
+        mDeviceToken = deviceToken;
+    }
+
     public String getOS() {
         return mOS;
     }

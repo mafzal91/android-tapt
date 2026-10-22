@@ -17,6 +17,8 @@ package com.linute.linute.API;
  */
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,19 +33,22 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.gcm.GcmListenerService;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 import com.linute.linute.LaunchActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatRoom;
 import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -55,6 +60,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
@@ -62,21 +68,40 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 
-public class MyGcmListenerService extends GcmListenerService {
+public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String TAG = "MyGcmListenerService";
+    private static final String TAG = "MyFirebaseMsgService";
+
+    private static final String CHANNEL_ID = "tapt";
 
     /**
-     * Called when message is received.
-     *
-     * @param from SenderID of the sender.
-     * @param data Data bundle containing message data as key/value pairs.
-     *             For Set of keys use data.keySet().
+     * Called when the push token is first issued or rotated. The server learns
+     * the token from the socket handshake, so reconnect with the new one.
+     */
+    @Override
+    public void onNewToken(String token) {
+        Log.d(TAG, "onNewToken");
+        getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
+                .edit().putString(QuickstartPreferences.OUR_TOKEN, token).apply();
+        DeviceInfoSingleton.getInstance(this).setDeviceToken(token);
+
+        TaptSocket socket = TaptSocket.getInstance();
+        if (socket != null) {
+            socket.updateDeviceToken(token);
+        }
+    }
+
+    /**
+     * Called when message is received. The server sends data-only messages whose
+     * payload is a flat string map (see handlers/notification-android.js).
      */
     // [START receive_message]
     @Override
-    public void onMessageReceived(String from, Bundle data) {
-        //String message = data.getString("message");
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+        Bundle data = new Bundle();
+        for (Map.Entry<String, String> entry : remoteMessage.getData().entrySet()) {
+            data.putString(entry.getKey(), entry.getValue());
+        }
 
         //doesn't post notifications if user is logged out
         SharedPreferences pref = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
@@ -130,15 +155,16 @@ public class MyGcmListenerService extends GcmListenerService {
     // [END receive_message]
 
     /**
-     * Create and show a simple notification containing the received GCM message.
+     * Create and show a simple notification containing the received FCM message.
      *
-     * @param data GCM Bundle received.
+     * @param data FCM data payload.
      */
     private void sendNotification(Bundle data, String action) {
 
         Intent intent = buildIntent(data, action);
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent,
+                        PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         //Log.d(TAG, data.toString());
 
@@ -170,7 +196,8 @@ public class MyGcmListenerService extends GcmListenerService {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         ChatRoom chatRoom = (ChatRoom) intent.getParcelableExtra("chatRoom");
         String title = chatRoom != null ? chatRoom.getRoomName() : "Tapt";
-        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        createNotificationChannel();
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                 .setColor(Color.BLACK)
                 .setContentTitle(title)
@@ -211,6 +238,14 @@ public class MyGcmListenerService extends GcmListenerService {
         final int notifId = notificationId.intValue();
         Notification notifications = notificationBuilder.build();
         NotificationManagerCompat.from(this).notify(notificationId.intValue(), notifications);
+    }
+
+    // Required since Android 8; without a channel notifications are dropped.
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                getString(R.string.app_name), NotificationManager.IMPORTANCE_HIGH);
+        getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 
     private static Bitmap getCircleBitmap(Bitmap bitmap) {

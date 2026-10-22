@@ -79,7 +79,9 @@ dependencies {
     implementation 'com.lyft:scissors:1.1.1'
     implementation 'io.reactivex:rxandroid:1.1.0'
     implementation 'io.reactivex:rxjava:1.1.0'
-    implementation 'com.google.android.gms:play-services-gcm:9.4.0'
+    implementation platform('com.google.firebase:firebase-bom:33.16.0')
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.android.gms:play-services-base:18.5.0'
     implementation 'com.getbase:floatingactionbutton:1.10.1'
     implementation 'androidx.multidex:multidex:2.0.1'
     //new
@@ -89,5 +91,11 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
 }
 
-apply plugin: 'com.google.gms.google-services'
+// app/google-services.json is not committed (see SETUP.md). Without it the
+// build still works, Firebase is never initialised and push is disabled.
+if (file('google-services.json').exists()) {
+    apply plugin: 'com.google.gms.google-services'
+} else {
+    logger.warn("app/google-services.json is missing; push notifications are disabled.")
+}
 
