@@ -53,6 +53,11 @@ public class API_Methods {
     public static String VERSION = VERSION_LIVE;
 
 
+    // Shared so every call goes through the session-expiry check (and reuses connections).
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+            .addInterceptor(SessionExpiry.INTERCEPTOR)
+            .build();
+
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -72,7 +77,7 @@ public class API_Methods {
                            Map<String, Object> parameters,
                            Callback callback) {
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers); //add headers
         HttpUrl.Builder url = new HttpUrl.Builder()   //build url
                 .scheme(SCHEME)
@@ -107,7 +112,7 @@ public class API_Methods {
 
         JSONObject json = new JSONObject(parameters);
         RequestBody body = RequestBody.create(JSON, json.toString()); //get requestbody
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers);   //add headers
         String url = getURL(path);
         Call call = client.newCall(new Request.Builder().url(url).headers(requestHeaders).method("POST", body).build());
@@ -123,7 +128,7 @@ public class API_Methods {
 
         JSONObject json = new JSONObject(parameters);
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers);   //add headers
         String url = getURL(path);
 
@@ -143,7 +148,7 @@ public class API_Methods {
 
         JSONObject json = new JSONObject(parameters);
         RequestBody body = RequestBody.create(JSON, json.toString()); //create json
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers); //add headers
         String url = getURL(path);
         Call call = client.newCall(new Request.Builder().url(url).method("PUT", body).headers(requestHeaders).build());
@@ -158,7 +163,7 @@ public class API_Methods {
                               Map<String, Object> params,
                               Callback callback) {
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
 
         Headers requestHeaders = Headers.of(headers); //add headers
 

@@ -33,6 +33,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.SessionExpiry;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.Chat.ChatRoom;
@@ -694,7 +695,11 @@ public class MainActivity extends BaseTaptActivity {
             // protocol sent an "error" event. Transport failures carry an
             // exception instead and are retried silently, as before.
             if (args.length > 0 && args[0] instanceof JSONObject) {
-                onEventError.call(args);
+                if (SessionExpiry.SOCKET_AUTH_ERROR.equals(((JSONObject) args[0]).optString("message"))) {
+                    SessionExpiry.expire();
+                } else {
+                    onEventError.call(args);
+                }
             }
         }
     };
