@@ -66,9 +66,36 @@ the token rotates.
 ```
 
 The value is a bare host name. `API_Methods.get()` passes it to
-`HttpUrl.Builder.host()`, which rejects `host:port`. Cleartext HTTP is blocked
-at targetSdk 35, so a local server needs HTTPS (for example a tunnel) or a
-debug-only network security config, which this repo doesn't have.
+`HttpUrl.Builder.host()`, which rejects `host:port`, so the server must listen
+on the scheme's default port. Cleartext HTTP is blocked at targetSdk 35; debug
+builds allow it for `api.gettapt` only (`app/src/debug/res/xml/network_security_config.xml`).
+
+### Running against a local backend
+
+The backend's local mode (`NODE_ENV=local`, see its README) serves HTTP on
+port 80 and routes by host name, so requests must arrive as `api.gettapt`.
+
+1. Start the backend: `docker compose up -d`, `pnpm install`, copy
+   `.env.local.example` to `.env.local`, `pnpm start`.
+2. Build and install:
+
+   ```sh
+   ./gradlew :app:installDebug -Ptapt.apiScheme=http \
+       -Ptapt.apiHost=api.gettapt -Ptapt.apiHostDev=api.gettapt
+   ```
+
+3. Point `api.gettapt` at the Mac inside the emulator. `10.0.2.2` is the host's
+   loopback. This needs a `google_apis` image (not `google_apis_playstore`):
+
+   ```sh
+   emulator -avd tapt35 -writable-system      # every launch from now on
+   adb root && adb remount && adb reboot      # first time only
+   adb root && adb remount
+   adb shell "echo '10.0.2.2 api.gettapt' >> /system/etc/hosts"
+   ```
+
+`pnpm smoke` in the backend creates users at Smoke Test University with the
+password `pass1234`, which is the quickest way to get an account to log in with.
 
 ## Known gaps
 
@@ -81,16 +108,19 @@ debug-only network security config, which this repo doesn't have.
   leaves the foreground.
 - **Open-source attributions.** One license string in `values/strings.xml` is
   longer than aapt2 allows, so it shows as `STRING_TOO_LARGE`.
-- **Not tested against the backend.** `api.tapt.mafz.al` had no DNS record
-  when this was written. On an API 35 emulator with a fake session (no
-  server), these work without crashing:
-  - launch, pre-login, login and the first sign-up screen
-  - the main feed shell, with the location and notification prompts
-  - camera, saving to `Pictures/Tapt`, the gallery picker (`READ_MEDIA_*`),
-    the editor's tools, and the upload service's failure notification
+- **Tested against a local backend only.** `api.tapt.mafz.al` had no DNS
+  record when this was written. On an API 35 emulator against the backend's
+  local mode (backend commit `9cbd3d5e`), these work:
+  - email login, the socket handshake, the campus feed and the badge counts
+  - likes and comments (saved to Mongo), chat rooms, history and sending
+  - a REST 401 from a bad token logs out and returns to the pre-login screen
 
-  The socket retries quietly while the host doesn't resolve. Video recording
-  and the FFmpeg path were not exercised.
+  Earlier, without a server: camera, saving to `Pictures/Tapt`, the gallery
+  picker (`READ_MEDIA_*`) and the editor's tools.
+
+  Not covered: posts with an image (the local backend has no R2 credentials,
+  so it answers 500), push, sign-up past the college step (see Backend
+  requests), video recording and the FFmpeg path.
 
 ## Old domains still referenced (for the owner)
 
@@ -125,3 +155,14 @@ Things the app needs from the server. The backend session picks these up.
       `email`, `password`, `firstName`, `lastName`, `timeZone`, `college` and
       optionally `profileImage` (base64 JPEG). No request has been seen to fail
       yet. Bodies will be recorded here if one does.
+- [ ] College search finds nothing for the seeded test colleges.
+      `GET /v1.4.8/colleges?name=Test&limit=30` returns `{"colleges":[],...,"totalCount":0}`
+      although "Test University" and "Smoke Test University" exist. The search
+      matches `keywords`, and the seed data (including the smoke test's
+      `seedCollege`) leaves `keywords` empty. Expected: the seeded colleges are
+      searchable by name, so sign-up can be tested locally.
+- [ ] Device header name. The app sends the device id as `UUID` (unchanged
+      since 2016), while `sessionHeader` reads `req.headers.udid`, so every REST
+      request gets `req.session.id = null` (the server logs `session null`).
+      Requests still succeed. Which side should change is a backend decision.
+      The socket handshake sends `udid` correctly.
