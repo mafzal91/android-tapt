@@ -81,8 +81,16 @@ debug-only network security config, which this repo doesn't have.
   leaves the foreground.
 - **Open-source attributions.** One license string in `values/strings.xml` is
   longer than aapt2 allows, so it shows as `STRING_TOO_LARGE`.
-- **Untested on a device.** Everything above compiles. Smoke test (step 8 of
-  the handoff) is still to do.
+- **Not tested against the backend.** `api.tapt.mafz.al` had no DNS record
+  when this was written. On an API 35 emulator with a fake session (no
+  server), these work without crashing:
+  - launch, pre-login, login and the first sign-up screen
+  - the main feed shell, with the location and notification prompts
+  - camera, saving to `Pictures/Tapt`, the gallery picker (`READ_MEDIA_*`),
+    the editor's tools, and the upload service's failure notification
+
+  The socket retries quietly while the host doesn't resolve. Video recording
+  and the FFmpeg path were not exercised.
 
 ## Old domains still referenced (for the owner)
 
