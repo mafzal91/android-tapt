@@ -156,6 +156,10 @@ Things the app needs from the server. The backend session picks these up.
       `email`, `password`, `firstName`, `lastName`, `timeZone`, `college` and
       optionally `profileImage` (base64 JPEG). No request has been seen to fail
       yet. Bodies will be recorded here if one does.
+- [ ] The terms of service and privacy policy pages
+      (`https://www.tapt.mafz.al/terms-of-service`, `/privacy-policy`) still
+      carry the 2016 text: "www.linute.com and/or www.gettapt.app", "owned or
+      controlled by Linute, LLC". The app links to them as they are.
 - [ ] Production has no searchable colleges, so nobody can sign up.
       `GET https://api.tapt.mafz.al/v1.4.8/colleges?name=university&limit=2`
       (also `a`, `new`, `college`, `hunter`) returns `{"colleges":[],...,"totalCount":0}`.
