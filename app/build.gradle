@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
+// The backend's MEDIA_URL, e.g. https://<bucket>.s3.amazonaws.com. Set
+// tapt.mediaUrl in ~/.gradle/gradle.properties or pass -Ptapt.mediaUrl=...
+def mediaUrl = (findProperty('tapt.mediaUrl') ?: '').toString().replaceAll('/+$', '')
+if (!mediaUrl) {
+    logger.warn("tapt.mediaUrl is not set; images and videos will not load.")
+    mediaUrl = 'https://tapt-media-url-not-set.invalid'
+}
+
 android {
     namespace 'com.linute.linute'
     compileSdk 35
@@ -20,6 +28,8 @@ android {
         buildConfigField "String", "API_HOST_LIVE", "\"${findProperty('tapt.apiHost') ?: 'api.tapt.mafz.al'}\""
         buildConfigField "String", "API_HOST_DEV", "\"${findProperty('tapt.apiHostDev') ?: findProperty('tapt.apiHost') ?: 'api.tapt.mafz.al'}\""
         buildConfigField "String", "API_VERSION", "\"${findProperty('tapt.apiVersion') ?: 'v1.4.8'}\""
+        // Base of every media URL (the backend's MEDIA_URL), no trailing slash.
+        buildConfigField "String", "MEDIA_URL", "\"${mediaUrl}\""
     }
     buildFeatures {
         buildConfig true
