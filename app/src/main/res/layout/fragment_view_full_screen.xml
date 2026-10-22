@@ -11,14 +11,14 @@
     <FrameLayout
         android:id="@+id/video_parent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/fifty_black">
 
         <com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView
             android:id="@+id/video"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="@color/fifty_black"
         />
 
     </FrameLayout>
