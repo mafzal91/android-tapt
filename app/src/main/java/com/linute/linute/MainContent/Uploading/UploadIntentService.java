@@ -1,11 +1,13 @@
 package com.linute.linute.MainContent.Uploading;
 
 import android.app.IntentService;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import androidx.core.app.NotificationCompat;
 import android.util.Log;
@@ -39,6 +41,8 @@ public class UploadIntentService extends IntentService {
 
     public static final String TAG = UploadIntentService.class.getSimpleName();
 
+    private static final String CHANNEL_ID = "uploads";
+
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
 
@@ -55,7 +59,12 @@ public class UploadIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(this);
+        // Required since Android 8. Low importance: progress updates shouldn't make a sound.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mNotificationManager.createNotificationChannel(new NotificationChannel(CHANNEL_ID,
+                    "Uploads", NotificationManager.IMPORTANCE_LOW));
+        }
+        mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
         mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload);
         mPendingFiles = 0;
         notificationId = new Random().nextInt();
@@ -199,7 +208,7 @@ public class UploadIntentService extends IntentService {
             intent.putExtra("event", eventID);
         }
 
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
 
@@ -231,7 +240,7 @@ public class UploadIntentService extends IntentService {
                 .setContentTitle("File failed to upload")
                 .setContentText("Tap to retry")
                 .setAutoCancel(true)
-                .setContentIntent(PendingIntent.getService(this, notificationId, i, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT));
+                .setContentIntent(PendingIntent.getService(this, notificationId, i, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
         mNotificationManager.cancel(ID);
         mNotificationManager.notify(notificationId++, mBuilder.build());

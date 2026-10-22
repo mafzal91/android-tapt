@@ -43,6 +43,7 @@ import com.linute.linute.MainContent.EditScreen.Dimens;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import java.io.IOException;
 import java.util.List;
@@ -849,7 +850,7 @@ public class CameraFragment extends Fragment {
     }
 
     private boolean hasCameraAndWritePermission() {
-        return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        return StoragePermissions.canWrite(getActivity())
                 && hasPermission(Manifest.permission.CAMERA)
                 && (!mCameraType.contains(CameraType.CAMERA_VIDEO) || hasPermission(Manifest.permission.RECORD_AUDIO));
     }

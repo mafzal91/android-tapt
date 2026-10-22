@@ -1,12 +1,10 @@
 package com.linute.linute.MainContent.CreateContent;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
@@ -47,6 +44,7 @@ import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import org.bson.types.ObjectId;
 
@@ -509,15 +507,14 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
         if (!hasWritePermission()) {
             ActivityCompat.requestPermissions(
                     this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    StoragePermissions.WRITE,
                     0
             );
         }
     }
 
     public boolean hasWritePermission() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED;
+        return StoragePermissions.canWrite(this);
     }
 
 }

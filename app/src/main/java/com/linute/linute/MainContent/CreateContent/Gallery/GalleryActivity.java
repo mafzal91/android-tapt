@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.CreateContent.Gallery;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 /**
  * Created by mikhail on 8/20/16.
@@ -108,10 +108,10 @@ public class GalleryActivity extends BaseSocketActivity {
     }
 
     private boolean hasReadPermission() {
-        return hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+        return StoragePermissions.canRead(this);
     }
 
     public void getReadPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQ_READ_EXT_STORAGE);
+        ActivityCompat.requestPermissions(this, StoragePermissions.READ, REQ_READ_EXT_STORAGE);
     }
 }

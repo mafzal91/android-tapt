@@ -1,21 +1,22 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
-import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LabeledIntent;
-import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
-import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import android.util.Log;
 
+import com.linute.linute.BuildConfig;
 import com.linute.linute.MainContent.SendTo.SendToActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class ShareUtil {
         }
 
 
-        if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)  == PackageManager.PERMISSION_DENIED){
+        if(!StoragePermissions.canWrite(context)){
 //            throw new IllegalArgumentException("This method needs WRITE_EXTERNAL_STORAGE permission to work");
             Log.e(TAG, BaseFeedItem.class.getSimpleName() + ".share() called without WRITE_EXTERNAL_STORAGE permission!!!");
             Log.e(TAG, "aborting share");
@@ -96,12 +97,19 @@ public class ShareUtil {
             sendIntent.setType("image/jpg");
         }
 
+        // file:// URIs crash when they leave the app (FileUriExposedException),
+        // so hand out the saved image through our FileProvider instead.
+        if ("file".equals(uri.getScheme())) {
+            uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileprovider", new File(uri.getPath()));
+        }
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         Intent shareIntent;
         Intent callbackIntent = new Intent(context, ShareService.class);
         callbackIntent.putExtra(ShareService.EXTRA_POST_ID, bfi.getId());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            PendingIntent callbackPendingIntent = PendingIntent.getService(context, ShareService.REQ_CODE, callbackIntent, 0);
+            // Mutable: the chooser fills in EXTRA_CHOSEN_COMPONENT.
+            PendingIntent callbackPendingIntent = PendingIntent.getService(context, ShareService.REQ_CODE, callbackIntent, PendingIntent.FLAG_MUTABLE);
             shareIntent = Intent.createChooser(sendIntent, "Share", callbackPendingIntent.getIntentSender());
         }else{
             shareIntent = Intent.createChooser(sendIntent, "Share");

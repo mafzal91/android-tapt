@@ -1,12 +1,10 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -72,6 +70,7 @@ import com.linute.linute.UtilsAndHelpers.SocketListener;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1841,8 +1840,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
         if (getContext() == null) return;
 
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
+        if (!StoragePermissions.canWrite(getContext())) {
+            ActivityCompat.requestPermissions(getActivity(), StoragePermissions.WRITE, PERM_REQ_WRITE_FOR_SHARE);
             shareItem = bfi;
         } else {
             ShareUtil.share(bfi, getContext(), listener);

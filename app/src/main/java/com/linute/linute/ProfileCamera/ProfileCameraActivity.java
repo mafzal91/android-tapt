@@ -15,8 +15,10 @@ import android.util.Log;
 
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -105,8 +107,8 @@ public class ProfileCameraActivity extends BaseSocketActivity {
             permissions.add(Manifest.permission.CAMERA);
         }
         //check for write
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (!StoragePermissions.canWrite(this)) {
+            Collections.addAll(permissions, StoragePermissions.WRITE);
         }
 
         //we need permissions

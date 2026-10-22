@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraSettingPreferences;
 import com.linute.linute.SquareCamera.ImageUtility;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import java.io.IOException;
 import java.util.List;
@@ -305,7 +306,7 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     }
 
     private boolean hasCameraAndWritePermission() {
-        return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        return StoragePermissions.canWrite(getActivity())
                 && hasPermission(Manifest.permission.CAMERA);
     }
 
