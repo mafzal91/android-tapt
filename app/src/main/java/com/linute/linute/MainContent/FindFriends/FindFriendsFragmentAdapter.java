@@ -25,7 +25,7 @@ public class FindFriendsFragmentAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 2;
     }
 
 
@@ -36,8 +36,6 @@ public class FindFriendsFragmentAdapter extends FragmentPagerAdapter {
                 return "Name";
             case 1:
                 return "Campus";
-            case 2:
-                return "Facebook";
         }
 
         return super.getPageTitle(position);

@@ -119,18 +119,4 @@
         </FrameLayout>
     </LinearLayout>
 
-    <Button android:id="@+id/facebook_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:background="@drawable/fb_button"
-            android:foreground="?android:selectableItemBackground"
-            android:paddingBottom="24dp"
-            android:paddingTop="24dp"
-            android:text="log in with Facebook"
-            android:textColor="@color/pure_white"
-            android:textStyle="bold"
-    />
-
 </FrameLayout>

@@ -38,16 +38,6 @@ public class PreloginChoicesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_signup_options, container, false);
 
-        rootView.findViewById(R.id.facebook_login).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PreLoginActivity activity = (PreLoginActivity) getActivity();
-                if (activity != null) {
-                    activity.selectedFacebookLogin();
-                }
-            }
-        });
-
         rootView.findViewById(R.id.linute_sign_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

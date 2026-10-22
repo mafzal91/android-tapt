@@ -122,16 +122,6 @@ public class LinuteLoginFragment extends Fragment {
             }
         });
 
-        rootView.findViewById(R.id.facebook_login).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PreLoginActivity activity = (PreLoginActivity) getActivity();
-                if (activity != null && mSafeForButtonAction) {
-                    activity.selectedFacebookLogin();
-                }
-            }
-        });
-
         rootView.findViewById(R.id.login_forgot_pass).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {

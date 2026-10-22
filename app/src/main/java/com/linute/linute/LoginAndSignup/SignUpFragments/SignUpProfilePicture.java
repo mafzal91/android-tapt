@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKUser;
@@ -38,7 +36,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -103,7 +100,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
 
     private void startCameraChoices() {
         if (getActivity() == null) return;
-        String[] options = {"Camera", "Photo Gallery", "Import from Facebook"};
+        String[] options = {"Camera", "Photo Gallery"};
         new AlertDialog.Builder(getActivity())
                 .setItems(options, this)
                 .show();
@@ -120,9 +117,6 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
             case 1:
                 startCamera(ProfileCameraActivity.TYPE_GALLERY);
                 break;
-            case 2:
-                getFacebookProfileImage();
-                break;
             default:
                 break;
         }
@@ -134,34 +128,6 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
         i.putExtra(ProfileCameraActivity.TYPE_KEY, type);
         startActivityForResult(i, REQUEST_PHOTO);
     }
-
-    private void getFacebookProfileImage() {
-        PreLoginActivity activity = (PreLoginActivity) getActivity();
-        if (activity != null) {
-            activity.getFBProfileImage(new PreLoginActivity.GetPhotoCallback() {
-                @Override
-                public void success(String id) {
-                    Uri image = Uri.parse(Utils.getFBImage(id));
-                    mSignUpInfo.setImage(image);
-
-                    Glide.with(SignUpProfilePicture.this)
-                            .load(image)
-                            .asBitmap()
-                            .placeholder(R.color.seperator_color)
-                            .into(vProfileImage);
-
-                    activateButton(true);
-                }
-
-                @Override
-                public void error() {
-                    if (getContext() != null)
-                        Toast.makeText(getContext(), "Error retrieving Facebook photo", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    }
-
 
     private void createAccount() {
         if (getContext() == null) return;
@@ -186,37 +152,17 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
         info.put("timeZone", Utils.getTimeZone());
         info.put("college", mSignUpInfo.getCollege().getCollegeId());
 
-        if (mSignUpInfo instanceof FBSignUpInfo) {
-            FBSignUpInfo fbSignUpInfo = (FBSignUpInfo) mSignUpInfo;
-            info.put("socialFacebook", fbSignUpInfo.getSocialFB());
-            info.put("sex", fbSignUpInfo.getSex());
-            info.put("registrationType", fbSignUpInfo.getRegistrationType());
-
-            String dob = fbSignUpInfo.getDob();
-            if (!dob.isEmpty() && !dob.equals("null")) {
-                info.put("dob", dob);
-            }
-        }
-
         try {
             if (mSignUpInfo.getImage() != null) {
-                if (mSignUpInfo.getImage().toString().contains("facebook.com")) {
-                    info.put("profileImage", Utils.encodeImageBase64(
-                            BitmapFactory.decodeFile(
-                                    Glide.with(this).load(mSignUpInfo.getImage()).downloadOnly(720, 720).get().getAbsolutePath()
-                            )
-                    ));
-                } else {
-                    info.put("profileImage",
-                            Utils.encodeImageBase64(
-                                    Bitmap.createScaledBitmap(
-                                            MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mSignUpInfo.getImage()),
-                                            720,
-                                            720,
-                                            false)));
-                }
+                info.put("profileImage",
+                        Utils.encodeImageBase64(
+                                Bitmap.createScaledBitmap(
+                                        MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mSignUpInfo.getImage()),
+                                        720,
+                                        720,
+                                        false)));
             }
-        } catch (IOException | InterruptedException | ExecutionException | NullPointerException e) {
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
         }
 

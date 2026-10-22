@@ -11,8 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.facebook.AccessToken;
-import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.Database.TaptUser;
@@ -123,9 +121,6 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
                         .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                 Utils.deleteTempSharedPreference(activity
                         .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE));
-
-                if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
-                    LoginManager.getInstance().logOut();
 
                 TaptSocket.getInstance().forceDisconnect();
                 TaptSocket.clear();

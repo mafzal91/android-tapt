@@ -9,9 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 
-import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
-import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.BuildConfig;
@@ -47,8 +44,6 @@ public class SettingActivity extends BaseSocketActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
-
         setContentView(R.layout.activity_settings);
 
         //get toolbar
@@ -196,7 +191,6 @@ public class SettingActivity extends BaseSocketActivity {
         }
 
         /* TODO: still need to add the following on click listeners:
-                mFindFriendFacebook
                 mFindFriendsContacts
          */
 
@@ -212,9 +206,6 @@ public class SettingActivity extends BaseSocketActivity {
                             .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                     Utils.deleteTempSharedPreference(getActivity()
                             .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE));
-
-                    if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
-                        LoginManager.getInstance().logOut();
 
                     TaptSocket.getInstance().forceDisconnect();
                     TaptSocket.clear();

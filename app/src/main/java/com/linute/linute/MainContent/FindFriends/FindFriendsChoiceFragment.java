@@ -21,7 +21,6 @@ import android.widget.TextView;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.BaseFindFriendsFragment;
-import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFBFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.SearchFilter;
 import com.linute.linute.MainContent.MainActivity;
@@ -83,8 +82,7 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         if (mFindFriendsFragments == null) {
             mFindFriendsFragments = new BaseFindFriendsFragment[]{
                     FindFriendsFragment.newInstance(new SearchFilter[]{}),
-                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)}),
-                    new FindFriendsFBFragment()
+                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)})
             };
         }
 
