@@ -50,7 +50,8 @@ so the bucket only needs whatever the server's data refers to.
 ### Firebase (push)
 
 1. Create a Firebase project and add an Android app with package name
-   **`com.linute.linute`**. The applicationId was not renamed.
+   **`al.mafz.tapt`**. That is the applicationId. The Java package is still
+   `com.linute.linute`, which Firebase doesn't care about.
 2. Download `google-services.json` into `app/`. Don't commit it.
 3. Give the backend a service account for that project (see Backend requests).
 

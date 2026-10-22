@@ -6,11 +6,12 @@ apply plugin: 'realm-android'
 def mediaUrl = (findProperty('tapt.mediaUrl') ?: 'https://media.tapt.mafz.al').toString().replaceAll('/+$', '')
 
 android {
+    // The Java package stays com.linute.linute; only the installed app id is new.
     namespace 'com.linute.linute'
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.linute.linute"
+        applicationId "al.mafz.tapt"
         minSdk 24
         targetSdk 35
         versionCode 43
