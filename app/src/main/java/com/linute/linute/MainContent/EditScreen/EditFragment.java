@@ -72,6 +72,7 @@ import com.linute.linute.UtilsAndHelpers.EditContentUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
+import com.linute.linute.UtilsAndHelpers.LocationPermissions;
 
 import org.bson.types.ObjectId;
 import org.json.JSONException;
@@ -504,8 +505,8 @@ public class EditFragment extends BaseFragment {
         mToolOptionsView.addView(mToolViews[i]);
         mToolOptionsView.requestLayout();
 
-        if(mTools[mSelectedTool] instanceof OverlaysTool && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        if(mTools[mSelectedTool] instanceof OverlaysTool && !LocationPermissions.granted(getContext())){
+                ActivityCompat.requestPermissions(getActivity(), LocationPermissions.REQUEST, REQUEST_LOCATION);
         }
     }
 

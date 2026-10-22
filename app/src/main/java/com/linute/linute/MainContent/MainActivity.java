@@ -69,12 +69,14 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.NetworkUtil;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+import com.linute.linute.UtilsAndHelpers.LocationPermissions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.Socket;
@@ -236,9 +238,9 @@ public class MainActivity extends BaseTaptActivity {
     public void getPermission() {
         ArrayList<String> missing = new ArrayList<>();
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        if (!LocationPermissions.granted(this)
                 && !ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            missing.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            Collections.addAll(missing, LocationPermissions.REQUEST);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -268,11 +270,8 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERM){
-            for (int i = 0; i < permissions.length && i < grantResults.length; i++) {
-                if (Manifest.permission.ACCESS_FINE_LOCATION.equals(permissions[i])
-                        && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    sendLocation();
-                }
+            if (LocationPermissions.granted(permissions, grantResults)) {
+                sendLocation();
             }
         }else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -628,8 +627,7 @@ public class MainActivity extends BaseTaptActivity {
         sendNetworkInformation();
 
         //try to send location
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (LocationPermissions.granted(this)) {
             sendLocation();
         }
         getPermission();
