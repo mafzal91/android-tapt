@@ -109,19 +109,25 @@ password `pass1234`, which is the quickest way to get an account to log in with.
   leaves the foreground.
 - **Open-source attributions.** One license string in `values/strings.xml` is
   longer than aapt2 allows, so it shows as `STRING_TOO_LARGE`.
-- **Tested against a local backend only.** `api.tapt.mafz.al` had no DNS
-  record when this was written. On an API 35 emulator against the backend's
-  local mode (backend commit `9cbd3d5e`), these work:
-  - email login, the socket handshake, the campus feed and the badge counts
-  - likes and comments (saved to Mongo), chat rooms, history and sending
-  - a REST 401 from a bad token logs out and returns to the pre-login screen
+- **Barely tested against production.** There is no production account
+  yet, and sign-up is blocked (see Backend requests). Against
+  `api.tapt.mafz.al` on an API 35 emulator:
+  - HTTPS, the host and `/v1.4.8` work: a login with an unknown email shows
+    the server's "No account with this email"
+  - a stored token the server rejects (REST 401) clears the session and
+    returns to the pre-login screen with a toast
+  - the socket handshake with a bad token gets
+    `44{"message":"Authentication error"}`, the string the app treats as an
+    expired session
 
+  Against the backend's local mode (commit `9cbd3d5e`): email login, the
+  socket, the campus feed, badge counts, likes, comments and chat all work.
   Earlier, without a server: camera, saving to `Pictures/Tapt`, the gallery
   picker (`READ_MEDIA_*`) and the editor's tools.
 
-  Not covered: posts with an image (the local backend has no R2 credentials,
-  so it answers 500), push, sign-up past the college step (see Backend
-  requests), video recording and the FFmpeg path.
+  Not covered anywhere: posts with an image, media loading from
+  `media.tapt.mafz.al`, push, sign-up past the college step, video recording
+  and the FFmpeg path.
 
 ## Domains and names
 
