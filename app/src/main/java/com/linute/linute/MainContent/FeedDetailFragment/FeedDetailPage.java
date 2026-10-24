@@ -1,25 +1,23 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -72,6 +70,7 @@ import com.linute.linute.UtilsAndHelpers.SocketListener;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1541,7 +1540,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                             (com.getCommentUserId() == null || !com.getCommentUserId().equals(mViewId))) {
 
                                         mNewCommentSnackbar = Snackbar.make(mCommentEditText, (mNewCommentCount > 1 ? mNewCommentCount + " New Comments" : "New Comment"), Snackbar.LENGTH_LONG);
-                                        TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                                        TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
                                         snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                                         snackbarTV.setGravity(Gravity.CENTER);
@@ -1841,8 +1840,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public void startShare(final BaseFeedItem bfi, BaseFeedAdapter.ShareProgressListener listener) {
         if (getContext() == null) return;
 
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERM_REQ_WRITE_FOR_SHARE);
+        if (!StoragePermissions.canWrite(getContext())) {
+            ActivityCompat.requestPermissions(getActivity(), StoragePermissions.WRITE, PERM_REQ_WRITE_FOR_SHARE);
             shareItem = bfi;
         } else {
             ShareUtil.share(bfi, getContext(), listener);

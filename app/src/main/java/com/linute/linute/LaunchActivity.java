@@ -10,11 +10,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.appsflyer.AppsFlyerLib;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.linute.linute.API.API_Methods;
@@ -32,7 +30,6 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import java.io.IOException;
 import java.util.Random;
 
-import io.fabric.sdk.android.Fabric;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -60,10 +57,6 @@ public class LaunchActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (!API_Methods.IS_DEV_BUILD) {
-            Fabric.with(this, new Crashlytics());
-        }
 
         Intent intent = getIntent();
         if(intent != null){
@@ -115,9 +108,6 @@ public class LaunchActivity extends Activity {
                     System.exit(2); //Prevents the service/app from freezing
             }
         });
-
-        AppsFlyerLib.getInstance().setDebugLog(false);
-        AppsFlyerLib.getInstance().startTracking(this.getApplication(), "VPnL9y82TinTofd5XRZ6TJ");
 
         generateNewSigniture();
 

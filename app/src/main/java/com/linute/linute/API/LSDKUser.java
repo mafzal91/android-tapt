@@ -200,17 +200,6 @@ public class LSDKUser {
         return API_Methods.post("users/confirm-pincode", API_Methods.getMainHeader(mToken), params, callback);
     }
 
-    //login facebook
-    public Call authorizationFacebook(String fbToken, Callback callback ){
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
-
-        Map<String, Object> param = new HashMap<>();
-        param.put("token", fbToken);
-
-        return API_Methods.post("users/authorization-facebook", header, param, callback);
-    }
-
-
     public Call updateLocation(Map<String, Object> params, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         return API_Methods.post("geo", header, params, callback);

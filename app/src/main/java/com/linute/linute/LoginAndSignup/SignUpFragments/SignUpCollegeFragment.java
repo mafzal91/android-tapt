@@ -10,9 +10,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.linute.linute.LoginAndSignup.College;
 import com.linute.linute.LoginAndSignup.SignUpFragments.CollegeSearch.SignUpCollegeSearch;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LocationPermissions;
 
 
 /**
@@ -102,11 +103,10 @@ public class SignUpCollegeFragment extends BaseSignUpFragment implements Locatio
 
     public void useLocationSearch() {
         if (getContext() == null) return;
-        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (LocationPermissions.granted(getContext())) {
             getLocationAndStartSearch();
         } else {
-            requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST);
+            requestPermissions(LocationPermissions.REQUEST, REQUEST);
         }
     }
 
@@ -181,7 +181,7 @@ public class SignUpCollegeFragment extends BaseSignUpFragment implements Locatio
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST && grantResults.length > 0) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (LocationPermissions.granted(permissions, grantResults)) {
                 gotResult = true;
             } else
                 Toast.makeText(getContext(), "Error retrieving your location", Toast.LENGTH_SHORT).show();

@@ -14,12 +14,11 @@ public class FindFriendsSearchPresenter extends BaseRequestPresenter<FriendSearc
 
     protected BaseFindFriendsInteractor mFindFriendsInteractor;
 
-    public static final int TYPE_FB = 0;
     public static final int TYPE_SEARCH = 1;
 
     public FindFriendsSearchPresenter(RequestCallbackView<FriendSearchUser> friendsView, int type) {
         super(friendsView);
-        mFindFriendsInteractor = type == TYPE_FB ? new FindFriendsFbInteractor() : new FindFriendsInteractor();
+        mFindFriendsInteractor = new FindFriendsInteractor();
     }
 
     @Override

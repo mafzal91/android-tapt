@@ -21,11 +21,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -43,6 +43,7 @@ import com.linute.linute.MainContent.EditScreen.Dimens;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import java.io.IOException;
 import java.util.List;
@@ -849,7 +850,7 @@ public class CameraFragment extends Fragment {
     }
 
     private boolean hasCameraAndWritePermission() {
-        return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        return StoragePermissions.canWrite(getActivity())
                 && hasPermission(Manifest.permission.CAMERA)
                 && (!mCameraType.contains(CameraType.CAMERA_VIDEO) || hasPermission(Manifest.permission.RECORD_AUDIO));
     }

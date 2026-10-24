@@ -2,9 +2,9 @@ package com.linute.linute.LoginAndSignup;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
@@ -37,16 +37,6 @@ public class PreloginChoicesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_signup_options, container, false);
-
-        rootView.findViewById(R.id.facebook_login).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PreLoginActivity activity = (PreLoginActivity) getActivity();
-                if (activity != null) {
-                    activity.selectedFacebookLogin();
-                }
-            }
-        });
 
         rootView.findViewById(R.id.linute_sign_up).setOnClickListener(new View.OnClickListener() {
             @Override

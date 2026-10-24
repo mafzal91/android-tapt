@@ -7,7 +7,7 @@
                 tools:context=".MainContent.Chat.SelectUsersFragment">
 
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/search_user_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -26,7 +26,7 @@
             android:imeOptions="actionSearch"
             android:inputType="text"
             android:textColor="@color/pure_white"/>
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
 
     <TextView
@@ -52,7 +52,7 @@
         android:layout_below="@id/search_user_toolbar"
         android:background="@color/chat_setting_divider"
     >
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/selected_users"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -67,7 +67,7 @@
     </FrameLayout>
 
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_users"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

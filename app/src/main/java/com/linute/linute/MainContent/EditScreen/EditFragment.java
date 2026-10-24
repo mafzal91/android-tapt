@@ -19,13 +19,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -72,6 +72,7 @@ import com.linute.linute.UtilsAndHelpers.EditContentUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
+import com.linute.linute.UtilsAndHelpers.LocationPermissions;
 
 import org.bson.types.ObjectId;
 import org.json.JSONException;
@@ -504,8 +505,8 @@ public class EditFragment extends BaseFragment {
         mToolOptionsView.addView(mToolViews[i]);
         mToolOptionsView.requestLayout();
 
-        if(mTools[mSelectedTool] instanceof OverlaysTool && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        if(mTools[mSelectedTool] instanceof OverlaysTool && !LocationPermissions.granted(getContext())){
+                ActivityCompat.requestPermissions(getActivity(), LocationPermissions.REQUEST, REQUEST_LOCATION);
         }
     }
 
@@ -1271,7 +1272,10 @@ public class EditFragment extends BaseFragment {
                             MediaMetadataRetriever media = new MediaMetadataRetriever();
                             media.setDataSource(outputFile);
                             Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
-                            media.release();
+                            try {
+                                media.release();
+                            } catch (IOException ignored) {
+                            }
 
                             ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
                             subscriber.onNext(image);

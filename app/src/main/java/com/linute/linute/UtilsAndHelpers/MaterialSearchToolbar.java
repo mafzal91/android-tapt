@@ -1,8 +1,8 @@
 package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;

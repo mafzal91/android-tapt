@@ -4,7 +4,7 @@
                 android:background="@color/pure_white"
                 android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/chat_fragment_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
             android:padding="8dp"
             android:src="@drawable/ic_action_action_settings"
         />
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     <!-- RecyclerView needs to be in FrameLayout to contain the destructive power of clipChildren=false-->
     <FrameLayout
@@ -30,7 +30,7 @@
         android:layout_below="@id/chat_fragment_toolbar"
         android:clipChildren="false">
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/chat_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

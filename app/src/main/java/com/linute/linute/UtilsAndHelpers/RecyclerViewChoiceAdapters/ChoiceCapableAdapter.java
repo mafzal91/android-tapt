@@ -1,7 +1,7 @@
 package com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters;
 
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by Arman on 12/27/15.

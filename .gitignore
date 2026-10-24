@@ -48,3 +48,6 @@ hs_err_pid*
 out
 gen
 # Created by .ignore support plugin (hsz.mobi)
+
+# Firebase config for the owner's project; see SETUP.md
+app/google-services.json

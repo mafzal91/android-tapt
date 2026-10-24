@@ -3,8 +3,8 @@ package com.linute.linute.LoginAndSignup.SignUpFragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,15 +82,10 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
         vEmail.addTextChangedListener(this);
         vEmail.setOnEditorActionListener(this);
 
-        if (mSignUpInfo instanceof FBSignUpInfo) {
-            vPassword.setVisibility(View.GONE);
-            vEmail.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        } else {
-            vPassword.setVisibility(View.VISIBLE);
-            vPassword.setOnEditorActionListener(this);
-            vPassword.addTextChangedListener(this);
-            vEmail.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-        }
+        vPassword.setVisibility(View.VISIBLE);
+        vPassword.setOnEditorActionListener(this);
+        vPassword.addTextChangedListener(this);
+        vEmail.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
         if (mCollege.getIncludedEmails().isEmpty()) {
             vSuggestionsText.setVisibility(View.GONE);
@@ -128,17 +123,11 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                     }
                 }
 
-                String password;
-
-                if (mSignUpInfo instanceof FBSignUpInfo) {
-                    password = ((FBSignUpInfo) mSignUpInfo).getSocialFB();
-                } else {
-                    password = vPassword.getText().toString();
-                    if (!isValidPassword(password)) {
-                        vPassword.setError("Passwords must be at least 6 characters");
-                        vPassword.requestFocus();
-                        return;
-                    }
+                String password = vPassword.getText().toString();
+                if (!isValidPassword(password)) {
+                    vPassword.setError("Passwords must be at least 6 characters");
+                    vPassword.requestFocus();
+                    return;
                 }
 
                 showConfirm(email, password);

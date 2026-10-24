@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.BuildConfig;
 import com.linute.linute.R;
 
 import org.apache.commons.io.FileUtils;
@@ -183,61 +184,65 @@ public class Utils {
         temp.apply();
     }
 
+    // Base URL of the media bucket, ending in "/". The server only stores file
+    // names; the folder and this base are added here.
+    private static final String MEDIA_URL = BuildConfig.MEDIA_URL + "/";
+
     public static String getEventImageURL(String jpegName) {
-        return "http://images.linute.com/events/original/" + jpegName;
+        return MEDIA_URL + "events/original/" + jpegName;
     }
 
     public static String getTrendsImageURL(String jpegName) {
-        return "http://images.linute.com/trends/" + jpegName;
+        return MEDIA_URL + "trends/" + jpegName;
     }
 
     public static String getMessageImageURL(String jpegName) {
-        return "http://images.linute.com/messages/original/" + jpegName;
+        return MEDIA_URL + "messages/original/" + jpegName;
     }
 
     public static String getMessageVideoURL(String jpegName) {
-        return "http://images.linute.com/messages/video/" + jpegName;
+        return MEDIA_URL + "messages/video/" + jpegName;
     }
 
     public static String getVideoURL(String videoEnd) {
-        return "http://images.linute.com/events/video/" + videoEnd;
+        return MEDIA_URL + "events/video/" + videoEnd;
     }
 
     //return url to a profile image of user
     public static String getImageUrlOfUser(String userImage) {
-        return "http://images.linute.com/profiles/original/" + userImage;
+        return MEDIA_URL + "profiles/original/" + userImage;
     }
 
     public static String getAnonImageUrl(String image) {
-        return "http://images.linute.com/profiles/anonymous/" + image;
+        return MEDIA_URL + "profiles/anonymous/" + image;
     }
 
     public static String getChatImageUrl(String image) {
-        return "http://images.linute.com/rooms/original/" + image;
+        return MEDIA_URL + "rooms/original/" + image;
     }
 
     public static String getChatThumbnailUrl(String image) {
-        return "http://images.linute.com/rooms/thumbnail/" + image;
+        return MEDIA_URL + "rooms/thumbnail/" + image;
     }
 
     public static String getFilterImageUrl(String image) {
-        return "http://images.linute.com/filters/" + image;
+        return MEDIA_URL + "filters/" + image;
     }
 
     public static String getMemeImageUrl(String image) {
-        return "http://images.linute.com/memes/" + image;
+        return MEDIA_URL + "memes/" + image;
     }
 
     public static String getCommentImageUrl(String image) {
-        return "http://images.linute.com/comments/original/" + image;
+        return MEDIA_URL + "comments/original/" + image;
     }
 
     public static String getArticleImageUrl(String media) {
-        return "http://images.linute.com/articles/original/" + media;
+        return MEDIA_URL + "articles/original/" + media;
     }
 
     public static String getArticleVideoUrl(String media) {
-        return "http://images.linute.com/articles/video/" + media;
+        return MEDIA_URL + "articles/video/" + media;
     }
 
 
@@ -311,11 +316,6 @@ public class Utils {
             mGlideSignature = new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
         }
         return mGlideSignature;
-    }
-
-
-    public static String getFBImage(String id) {
-        return String.format("https://graph.facebook.com/%s/picture?width=720&height=720", id);
     }
 
 

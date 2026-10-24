@@ -9,17 +9,18 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -31,9 +32,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
-import com.facebook.AccessToken;
-import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.SessionExpiry;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.Chat.ChatRoom;
@@ -70,12 +70,14 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.NetworkUtil;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+import com.linute.linute.UtilsAndHelpers.LocationPermissions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.Socket;
@@ -232,12 +234,23 @@ public class MainActivity extends BaseTaptActivity {
     public static final int LOCATION_PERM = 82;
 
 
+    // Location and (Android 13+) notifications go in one request: Android
+    // rejects a second request while the first dialog is still showing.
     public void getPermission() {
+        ArrayList<String> missing = new ArrayList<>();
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (!LocationPermissions.granted(this)
+                && !ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            Collections.addAll(missing, LocationPermissions.REQUEST);
+        }
 
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERM);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            missing.add(Manifest.permission.POST_NOTIFICATIONS);
+        }
 
+        if (!missing.isEmpty()) {
+            ActivityCompat.requestPermissions(this, missing.toArray(new String[0]), LOCATION_PERM);
         }/*else {
             *//*new AlertDialog.Builder(this)
                     .setTitle("Need location permission")
@@ -258,7 +271,7 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERM){
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            if (LocationPermissions.granted(permissions, grantResults)) {
                 sendLocation();
             }
         }else {
@@ -392,7 +405,7 @@ public class MainActivity extends BaseTaptActivity {
             loadDrawerHeader(); //reload drawer header
         } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
             Intent intent = new Intent(this, UploadIntentService.class);
-            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
+            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, (android.os.Parcelable) data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
             startService(intent);
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -599,9 +612,8 @@ public class MainActivity extends BaseTaptActivity {
         socket.on("message", message);
         socket.on("alert", alert);
         socket.on("modes disabled", modesDisabled);
-        socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        socket.on(Socket.EVENT_ERROR, onEventError);
-        socket.on(Socket.EVENT_RECONNECT, onReconnect);
+        socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        socket.onReconnect(onReconnect);
         socket.connectSocket();
 
         //get friends list
@@ -616,12 +628,10 @@ public class MainActivity extends BaseTaptActivity {
         sendNetworkInformation();
 
         //try to send location
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (LocationPermissions.granted(this)) {
             sendLocation();
-        }else {
-            getPermission();
         }
+        getPermission();
     }
 
     /******
@@ -666,9 +676,7 @@ public class MainActivity extends BaseTaptActivity {
             socket.off("alert", alert);
             socket.off("modes disabled", modesDisabled);
             socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            socket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
-            socket.off(Socket.EVENT_ERROR, onEventError);
-            socket.off(Socket.EVENT_RECONNECT, onReconnect);
+            socket.offReconnect(onReconnect);
         }
     }
 
@@ -682,6 +690,17 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             Log.d(TAG, "call: failed socket connection");
+            // Socket.IO 3+ reports a server-side rejection (e.g. the auth
+            // middleware) as connect_error with a JSON payload, where the old
+            // protocol sent an "error" event. Transport failures carry an
+            // exception instead and are retried silently, as before.
+            if (args.length > 0 && args[0] instanceof JSONObject) {
+                if (SessionExpiry.SOCKET_AUTH_ERROR.equals(((JSONObject) args[0]).optString("message"))) {
+                    SessionExpiry.expire();
+                } else {
+                    onEventError.call(args);
+                }
+            }
         }
     };
 
@@ -989,9 +1008,6 @@ public class MainActivity extends BaseTaptActivity {
                 TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:logout", new JSONObject());
                 Utils.resetUserInformation(getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                 Utils.deleteTempSharedPreference(getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE));
-                if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
-                    LoginManager.getInstance().logOut();
-
                 TaptSocket.getInstance().forceDisconnect();
                 TaptSocket.clear();
 

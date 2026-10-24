@@ -1,13 +1,13 @@
 package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
-import android.support.v4.widget.Space;
+import android.view.View;
 import android.util.AttributeSet;
 
 /**
  * Created by QiFeng on 7/5/16.
  */
-public class SquareSpace extends Space {
+public class SquareSpace extends View {
     public SquareSpace(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }

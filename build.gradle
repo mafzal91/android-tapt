@@ -2,12 +2,13 @@
 
 buildscript {
     repositories {
-        jcenter()
+        google()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
-        classpath "io.realm:realm-gradle-plugin:2.1.1"
-        classpath 'com.google.gms:google-services:3.0.0'
+        classpath 'com.android.tools.build:gradle:8.13.2'
+        classpath 'io.realm:realm-gradle-plugin:10.19.0'
+        classpath 'com.google.gms:google-services:4.4.4'
 
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -18,11 +19,15 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
-        maven { url "https://jitpack.io" }
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        // Read-only JCenter. Still the only host for FFmpegAndroid and a few
+        // other 2016 libraries; keep it last so Maven Central wins.
+        maven { url 'https://jcenter.bintray.com' }
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
 }

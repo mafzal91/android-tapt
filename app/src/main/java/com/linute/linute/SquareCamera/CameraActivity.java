@@ -4,18 +4,20 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.content.ContextCompat;
 
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.EditScreen.PostOptions;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
+import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -123,8 +125,8 @@ public class CameraActivity extends BaseSocketActivity {
             permissions.add(Manifest.permission.CAMERA);
         }
         //check for write
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (!StoragePermissions.canWrite(this)) {
+            Collections.addAll(permissions, StoragePermissions.WRITE);
         }
 
         if (mCameraType.contains(CameraType.CAMERA_VIDEO) &&

@@ -5,7 +5,7 @@ import android.content.Intent;
 
 public class ImageUtils {
 
-    public static void pickUsing(android.support.v4.app.Fragment fragment, int requestCode){
+    public static void pickUsing(androidx.fragment.app.Fragment fragment, int requestCode){
         fragment.startActivityForResult(
                 createChooserIntent(),
                 requestCode);

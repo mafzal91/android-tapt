@@ -6,10 +6,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.SwitchCompat;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.SwitchCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -119,16 +119,6 @@ public class LinuteLoginFragment extends Fragment {
                     mSigninButton.callOnClick();
                 }
                 return false;
-            }
-        });
-
-        rootView.findViewById(R.id.facebook_login).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PreLoginActivity activity = (PreLoginActivity) getActivity();
-                if (activity != null && mSafeForButtonAction) {
-                    activity.selectedFacebookLogin();
-                }
             }
         });
 

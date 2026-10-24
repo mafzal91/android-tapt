@@ -70,7 +70,7 @@
                         android:textStyle="bold"
                         tools:text="Name Nam" />
 
-                    <android.support.v4.widget.Space
+                    <android.widget.Space
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"

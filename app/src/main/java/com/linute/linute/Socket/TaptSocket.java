@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
 import com.linute.linute.API.API_Methods;
@@ -15,9 +15,12 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 import io.socket.client.IO;
+import io.socket.client.Manager;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
@@ -29,6 +32,7 @@ public class TaptSocket {
 
     private static final String TAG = TaptSocket.class.getSimpleName();
     private Socket mSocket;
+    private IO.Options mOptions;
 
     // counts how many Activities are using this connection
     // in Activity onResume, increment this
@@ -63,24 +67,36 @@ public class TaptSocket {
                 }
             }
 
-            op.query = "token=" + token +
-                    "&deviceToken=" + device.getDeviceToken() +
-                    "&udid=" + device.getUdid() +
-                    "&version=" + device.getVersionName() +
-                    "&build=" + device.getVersionCode() +
-                    "&os=" + device.getOS() +
-                    "&platform=" + device.getType() +
-                    "&api=" + API_Methods.VERSION +
-                    "&model=" + device.getModel() +
-                    "&geo=" + coord;
+            op.query = "token=" + encode(token) +
+                    "&deviceToken=" + encode(device.getDeviceToken()) +
+                    "&udid=" + encode(device.getUdid()) +
+                    "&version=" + encode(device.getVersionName()) +
+                    "&build=" + encode(device.getVersionCode()) +
+                    "&os=" + encode(device.getOS()) +
+                    "&platform=" + encode(device.getType()) +
+                    "&api=" + encode(API_Methods.VERSION) +
+                    "&model=" + encode(device.getModel()) +
+                    "&geo=" + encode(coord.toString());
 
             op.reconnectionDelay = 5;
             op.secure = true;
             op.transports = new String[]{WebSocket.NAME};
 
+            mOptions = op;
             mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
         } catch (URISyntaxException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Query values such as the device model ("Pixel 8") and geo ("[40.7,-74.0]")
+    // contain characters that are not valid in a URI.
+    private static String encode(String value) {
+        if (value == null) return "";
+        try {
+            return URLEncoder.encode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -123,6 +139,18 @@ public class TaptSocket {
     }
 
 
+    // The server registers the push token from the handshake query, so a new
+    // token only reaches it on the next connection.
+    public void updateDeviceToken(String deviceToken) {
+        if (mSocket == null) return;
+        // The Manager reads these options again on every (re)connect.
+        mOptions.query = mOptions.query.replaceFirst("deviceToken=[^&]*", "deviceToken=" + encode(deviceToken));
+        if (mSocket.connected()) {
+            mSocket.disconnect();
+            mSocket.connect();
+        }
+    }
+
     public static TaptSocket getInstance() {
         return mTaptSocket;
     }
@@ -133,6 +161,15 @@ public class TaptSocket {
 
     public void off(String event, Emitter.Listener listener) {
         mSocket.off(event, listener);
+    }
+
+    // In socket.io-client 2.x reconnect events come from the Manager, not the Socket.
+    public void onReconnect(Emitter.Listener listener) {
+        mSocket.io().on(Manager.EVENT_RECONNECT, listener);
+    }
+
+    public void offReconnect(Emitter.Listener listener) {
+        mSocket.io().off(Manager.EVENT_RECONNECT, listener);
     }
 
     public void emit(String event, Object arg) {

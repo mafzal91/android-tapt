@@ -2,6 +2,7 @@ package com.linute.linute.API;
 
 import android.os.Build;
 
+import com.linute.linute.BuildConfig;
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -38,19 +39,24 @@ public class API_Methods {
 
 
     // API ENDPOINT URL
-    public static final String SCHEME = "https";
+    // Set in app/build.gradle; override per build type or from gradle.properties.
+    public static final String SCHEME = BuildConfig.API_SCHEME;
 
-    //    public static String HOST = "api.tapt.io";
-    public static final String HOST_DEV = "devapi.tapt.io";
-    public static final String HOST_LIVE = "api.tapt.io";
+    public static final String HOST_DEV = BuildConfig.API_HOST_DEV;
+    public static final String HOST_LIVE = BuildConfig.API_HOST_LIVE;
 
-    public static final String VERSION_DEV = "v1.4.8";
-    public static final String VERSION_LIVE = "v1.4.7";
+    public static final String VERSION_DEV = BuildConfig.API_VERSION;
+    public static final String VERSION_LIVE = BuildConfig.API_VERSION;
 
     //set default to live, just in case
     public static String HOST = HOST_LIVE;
     public static String VERSION = VERSION_LIVE;
 
+
+    // Shared so every call goes through the session-expiry check (and reuses connections).
+    private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+            .addInterceptor(SessionExpiry.INTERCEPTOR)
+            .build();
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -71,7 +77,7 @@ public class API_Methods {
                            Map<String, Object> parameters,
                            Callback callback) {
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers); //add headers
         HttpUrl.Builder url = new HttpUrl.Builder()   //build url
                 .scheme(SCHEME)
@@ -106,7 +112,7 @@ public class API_Methods {
 
         JSONObject json = new JSONObject(parameters);
         RequestBody body = RequestBody.create(JSON, json.toString()); //get requestbody
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers);   //add headers
         String url = getURL(path);
         Call call = client.newCall(new Request.Builder().url(url).headers(requestHeaders).method("POST", body).build());
@@ -122,7 +128,7 @@ public class API_Methods {
 
         JSONObject json = new JSONObject(parameters);
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers);   //add headers
         String url = getURL(path);
 
@@ -142,7 +148,7 @@ public class API_Methods {
 
         JSONObject json = new JSONObject(parameters);
         RequestBody body = RequestBody.create(JSON, json.toString()); //create json
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
         Headers requestHeaders = Headers.of(headers); //add headers
         String url = getURL(path);
         Call call = client.newCall(new Request.Builder().url(url).method("PUT", body).headers(requestHeaders).build());
@@ -157,7 +163,7 @@ public class API_Methods {
                               Map<String, Object> params,
                               Callback callback) {
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = CLIENT;
 
         Headers requestHeaders = Headers.of(headers); //add headers
 

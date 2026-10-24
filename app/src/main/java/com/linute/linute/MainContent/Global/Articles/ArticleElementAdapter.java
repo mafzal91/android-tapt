@@ -5,8 +5,8 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -20,29 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.LoadControl;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -271,7 +251,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private static class VideoElementVH extends ElementVH implements View.OnClickListener {
 
         private final ImageView vPreview;
-        private final SimpleExoPlayerView vVideo;
+        private final StyledPlayerView vVideo;
 //        private final ImageView vPause;
 
 //        private final WebView vHTML5;
@@ -279,18 +259,8 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         VideoElementVH(View itemView) {
             super(itemView);
             vPreview = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-            vVideo = (SimpleExoPlayerView) itemView.findViewById(R.id.exo_player);
-            Handler mainHandler = new Handler();
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            TrackSelection.Factory videoTrackSelectionFactory =
-                    new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
-            TrackSelector trackSelector =
-                    new DefaultTrackSelector(mainHandler, videoTrackSelectionFactory);
-
-            LoadControl loadControl = new DefaultLoadControl();
-
-            SimpleExoPlayer player =
-                    ExoPlayerFactory.newSimpleInstance(itemView.getContext(), trackSelector, loadControl);
+            vVideo = (StyledPlayerView) itemView.findViewById(R.id.exo_player);
+            ExoPlayer player = new ExoPlayer.Builder(itemView.getContext()).build();
 
 
             vVideo.setPlayer(player);
@@ -306,35 +276,9 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 //            b.recycle();
 //
             vVideo.getLayoutParams().height = (int) (ratio * itemView.getResources().getDisplayMetrics().widthPixels);
-            vVideo.getPlayer().prepare(buildMediaSource(Uri.parse(url), null));
+            vVideo.getPlayer().setMediaItem(MediaItem.fromUri(Uri.parse(url)));
+            vVideo.getPlayer().prepare();
             vVideo.setControllerShowTimeoutMs(2000);
-        }
-
-        private MediaSource buildMediaSource(Uri uri, String overrideExtension) {
-            int type = Util.inferContentType(!TextUtils.isEmpty(overrideExtension) ? "." + overrideExtension
-                    : uri.getLastPathSegment());
-            DataSource.Factory manifestDataSourceFactory = buildDataSourceFactory();
-            switch (type) {
-                case C.TYPE_SS:
-                    return new SsMediaSource(uri, manifestDataSourceFactory,
-                            new DefaultSsChunkSource.Factory(manifestDataSourceFactory), new Handler(), null);
-                case C.TYPE_DASH:
-                    return new DashMediaSource(uri, manifestDataSourceFactory,
-                            new DefaultDashChunkSource.Factory(manifestDataSourceFactory), new Handler(), null);
-                case C.TYPE_HLS:
-                    return new HlsMediaSource(uri, manifestDataSourceFactory, new Handler(), null);
-                case C.TYPE_OTHER:
-                    return new ExtractorMediaSource(uri, manifestDataSourceFactory, new DefaultExtractorsFactory(),
-                            new Handler(), null);
-                default: {
-                    throw new IllegalStateException("Unsupported type: " + type);
-                }
-            }
-        }
-
-        private DataSource.Factory buildDataSourceFactory() {
-
-            return new DefaultHttpDataSourceFactory("a");
         }
 
         @Override

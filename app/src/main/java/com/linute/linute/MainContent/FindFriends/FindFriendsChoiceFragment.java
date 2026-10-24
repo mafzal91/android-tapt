@@ -2,12 +2,12 @@ package com.linute.linute.MainContent.FindFriends;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.Nullable;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -21,7 +21,6 @@ import android.widget.TextView;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.BaseFindFriendsFragment;
-import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFBFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.SearchFilter;
 import com.linute.linute.MainContent.MainActivity;
@@ -83,8 +82,7 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         if (mFindFriendsFragments == null) {
             mFindFriendsFragments = new BaseFindFriendsFragment[]{
                     FindFriendsFragment.newInstance(new SearchFilter[]{}),
-                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)}),
-                    new FindFriendsFBFragment()
+                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)})
             };
         }
 

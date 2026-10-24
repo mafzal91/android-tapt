@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files the app shares with other apps through FileProvider (see ShareUtil). -->
+<paths>
+    <external-path
+        name="tapt_pictures"
+        path="Pictures/Tapt/" />
+    <cache-path
+        name="cache"
+        path="." />
+</paths>

@@ -16,7 +16,7 @@
         android:src="@drawable/ic_action_navigation_arrow_back_inverted"
     />
 
-    <android.support.v7.widget.SwitchCompat
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/dev_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -118,19 +118,5 @@
 
         </FrameLayout>
     </LinearLayout>
-
-    <Button android:id="@+id/facebook_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:background="@drawable/fb_button"
-            android:foreground="?android:selectableItemBackground"
-            android:paddingBottom="24dp"
-            android:paddingTop="24dp"
-            android:text="log in with Facebook"
-            android:textColor="@color/pure_white"
-            android:textStyle="bold"
-    />
 
 </FrameLayout>
