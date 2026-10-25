@@ -284,7 +284,7 @@ public class SettingActivity extends BaseSocketActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), WebViewActivity.class);
-                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/privacy-policy");
+                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.mafz.al/privacy-policy");
                     startActivity(i);
                     return true;
                 }
@@ -305,7 +305,7 @@ public class SettingActivity extends BaseSocketActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), WebViewActivity.class);
-                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/terms-of-service");
+                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.mafz.al/terms-of-service");
                     startActivity(i);
                     return true;
                 }

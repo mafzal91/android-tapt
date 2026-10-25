@@ -118,7 +118,7 @@ public class ShareUtil {
 
         final Intent taptShareIntent = new Intent(context, SendToActivity.class);
         taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
-        shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, "com.linute.linute", "Messenger", R.mipmap.ic_launcher)});
+        shareIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{new LabeledIntent(taptShareIntent, BuildConfig.APPLICATION_ID, "Messenger", R.mipmap.ic_launcher)});
 
 
 

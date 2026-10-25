@@ -98,7 +98,7 @@ public class FiveStarsDialog implements DialogInterface.OnClickListener {
     private void sendEmail() {
         final Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.io"});
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.mafz.al"});
         intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
         intent.putExtra(android.content.Intent.EXTRA_TEXT, "What can we do to make Tapt better?");
         if (intent.resolveActivity(context.getPackageManager()) != null) {

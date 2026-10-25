@@ -78,7 +78,7 @@ public class PreloginChoicesFragment extends Fragment {
             @Override
             public void onClick(View widget) {
                 Intent intent = new Intent(getActivity(), WebViewActivity.class);
-                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/terms-of-service");
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.mafz.al/terms-of-service");
                 startActivity(intent);
             }
 
@@ -100,7 +100,7 @@ public class PreloginChoicesFragment extends Fragment {
             @Override
             public void onClick(View widget) {
                 Intent intent = new Intent(getActivity(), WebViewActivity.class);
-                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/privacy-policy");
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.mafz.al/privacy-policy");
                 startActivity(intent);
             }
 
