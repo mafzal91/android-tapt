@@ -55,10 +55,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name=".API.RegistrationIntentService"
-            android:exported="false" />
-
         <activity
             android:name=".MainContent.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"

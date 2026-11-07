@@ -2,15 +2,12 @@ package com.linute.linute;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -19,7 +16,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKAnalytics;
 import com.linute.linute.API.QuickstartPreferences;
-import com.linute.linute.API.RegistrationIntentService;
+import com.linute.linute.API.PushRegistration;
 import com.linute.linute.LoginAndSignup.CollegePickerActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Global.Articles.ArticleActivity;
@@ -48,7 +45,7 @@ public class LaunchActivity extends Activity {
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private boolean mResumed;
 
 
     public static final String EXTRA_REPORT_NOTIF_OPENED = "report opened";
@@ -111,34 +108,6 @@ public class LaunchActivity extends Activity {
 
         generateNewSigniture();
 
-        //set broadcast receiver
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-                String token = sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null);
-////                    requestServices();
-                if (token != null) {
-                    goToNextActivity();
-                }
-//                //No token and unsuccessful registration
-                else {
-                    new AlertDialog.Builder(LaunchActivity.this)
-                            .setTitle("Problem With Connection")
-                            .setMessage("Make sure you are connected to a network.")
-                            .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {  //retry to connect
-                                    runRegistrationIntentService();
-                                    dialog.dismiss();
-                                }
-                            })
-                            .show();
-                }
-            }
-        };
-
         DeviceInfoSingleton.getInstance(this);
     }
 
@@ -153,27 +122,51 @@ public class LaunchActivity extends Activity {
     }
 
     //register device
-    private void runRegistrationIntentService() {
-        Intent intent = new Intent(this, RegistrationIntentService.class);
-        startService(intent);
+    private void registerForPush() {
+        PushRegistration.register(this, this::onPushRegistered);
+    }
+
+    private void onPushRegistered() {
+        // Left the screen in the meantime. onResume starts over when the user comes back.
+        if (!mResumed) return;
+
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        String token = sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null);
+////                    requestServices();
+        if (token != null) {
+            goToNextActivity();
+        }
+//                //No token and unsuccessful registration
+        else {
+            new AlertDialog.Builder(LaunchActivity.this)
+                    .setTitle("Problem With Connection")
+                    .setMessage("Make sure you are connected to a network.")
+                    .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {  //retry to connect
+                            registerForPush();
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+        mResumed = true;
 
         //register gcm token
         if (checkPlayServices()) {
-            runRegistrationIntentService();
+            registerForPush();
         }
 
     }
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        mResumed = false;
         super.onPause();
 
     }

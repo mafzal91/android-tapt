@@ -17,48 +17,49 @@ package com.linute.linute.API;
  */
 
 
-import android.app.IntentService;
-import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
-public class RegistrationIntentService extends IntentService {
+public final class PushRegistration {
 
     private static final String TAG = "Registration";
 
-    public RegistrationIntentService() {
-        super(TAG);
+    private PushRegistration() {
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+    /**
+     * Gets the FCM token and saves it. onDone runs on the main thread, even if that failed.
+     */
+    public static void register(Context context, final Runnable onDone) {
+        final Context appContext = context.getApplicationContext();
+        final SharedPreferences sharedPreferences = appContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        if (FirebaseApp.getApps(this).isEmpty()) {
+        if (FirebaseApp.getApps(appContext).isEmpty()) {
             // Built without google-services.json: no push, but don't block launch.
             Log.w(TAG, "Firebase is not configured; push notifications are disabled");
             if (sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null) == null) {
                 sharedPreferences.edit().putString(QuickstartPreferences.OUR_TOKEN, "").apply();
             }
-        } else {
-            try {
-                // Network on first call, cached afterwards. Rotations arrive in
-                // MyFirebaseMessagingService.onNewToken.
-                String token = Tasks.await(FirebaseMessaging.getInstance().getToken());
-                sharedPreferences.edit().putString(QuickstartPreferences.OUR_TOKEN, token).apply();
-                DeviceInfoSingleton.getInstance(this).setDeviceToken(token);
-            } catch (Exception e) {
-                Log.d(TAG, "Failed to get FCM token", e);
-            }
+            onDone.run();
+            return;
         }
 
-        Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
-        LocalBroadcastManager.getInstance(RegistrationIntentService.this).sendBroadcast(registrationComplete);
+        // Network on first call, cached afterwards. Rotations arrive in
+        // MyFirebaseMessagingService.onNewToken.
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String token = task.getResult();
+                sharedPreferences.edit().putString(QuickstartPreferences.OUR_TOKEN, token).apply();
+                DeviceInfoSingleton.getInstance(appContext).setDeviceToken(token);
+            } else {
+                Log.d(TAG, "Failed to get FCM token", task.getException());
+            }
+            onDone.run();
+        });
     }
 }
