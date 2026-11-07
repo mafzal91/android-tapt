@@ -61,10 +61,10 @@ import java.util.HashMap;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment.PERM_REQ_WRITE_FOR_SHARE;
 
@@ -289,7 +289,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
     public void onPause() {
         super.onPause();
         if (mNotificationSubscription != null) {
-            mNotificationSubscription.unsubscribe();
+            mNotificationSubscription.dispose();
         }
 
         SingleVideoPlaybackManager.getInstance().stopPlayback();
@@ -588,11 +588,11 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
             vRecList.scrollToPosition(0);
     }
 
-    private Subscription mNotificationSubscription;
+    private Disposable mNotificationSubscription;
 
-    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+    private Consumer<NotificationEvent> mNotificationEventAction1 = new Consumer<NotificationEvent>() {
         @Override
-        public void call(NotificationEvent notificationEvent) {
+        public void accept(NotificationEvent notificationEvent) {
             if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
                 int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
                 vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);

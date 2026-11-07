@@ -33,10 +33,10 @@ import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
 
@@ -321,11 +321,11 @@ public class DiscoverHolderFragment extends BaseFragment {
         SingleVideoPlaybackManager.getInstance().stopPlayback();
 
         if (mChatSubscription != null) {
-            mChatSubscription.unsubscribe();
+            mChatSubscription.dispose();
         }
 
         if (mNotificationSubscription != null) {
-            mNotificationSubscription.unsubscribe();
+            mNotificationSubscription.dispose();
         }
 
         mAppBarLayout.setExpanded(true, false);
@@ -347,22 +347,22 @@ public class DiscoverHolderFragment extends BaseFragment {
         mFeedFragments[0].scrollUp();
     }
 
-    private Subscription mChatSubscription;
+    private Disposable mChatSubscription;
 
-    private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
+    private Consumer<NewMessageEvent> mNewMessageSubscriber = new Consumer<NewMessageEvent>() {
         @Override
-        public void call(NewMessageEvent event) {
+        public void accept(NewMessageEvent event) {
             mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
             int count = NotificationsCounterSingleton.getInstance().getNumMessages();
             mNotificationCount.setText(count < 100 ? count + "" : "+");
         }
     };
 
-    private Subscription mNotificationSubscription;
+    private Disposable mNotificationSubscription;
 
-    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+    private Consumer<NotificationEvent> mNotificationEventAction1 = new Consumer<NotificationEvent>() {
         @Override
-        public void call(NotificationEvent notificationEvent) {
+        public void accept(NotificationEvent notificationEvent) {
             if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
                 int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
                 mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);

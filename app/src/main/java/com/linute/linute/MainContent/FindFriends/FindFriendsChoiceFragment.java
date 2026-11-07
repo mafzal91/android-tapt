@@ -28,10 +28,10 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by QiFeng on 1/25/16.
@@ -195,7 +195,7 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         if(activity != null)activity.lockDrawer(DrawerLayout.LOCK_MODE_UNLOCKED);
 
         if (mNotificationSubscription != null) {
-            mNotificationSubscription.unsubscribe();
+            mNotificationSubscription.dispose();
         }
     }
 
@@ -209,10 +209,10 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         }
     }
 
-    private Subscription mNotificationSubscription;
-    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+    private Disposable mNotificationSubscription;
+    private Consumer<NotificationEvent> mNotificationEventAction1 = new Consumer<NotificationEvent>() {
         @Override
-        public void call(NotificationEvent notificationEvent) {
+        public void accept(NotificationEvent notificationEvent) {
             if (mOnlyFragmentInStack && notificationEvent.getType() == NotificationEvent.DISCOVER) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
             }

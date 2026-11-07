@@ -33,16 +33,18 @@ import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
-import static rx.android.schedulers.AndroidSchedulers.mainThread;
-import static rx.schedulers.Schedulers.io;
+import static io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread;
+import static io.reactivex.rxjava3.schedulers.Schedulers.io;
 
 /**
  * Created by QiFeng on 7/5/16.
@@ -65,8 +67,8 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     private Handler mRecordHandler = new Handler();
     private Handler mShowPreviewHandler = new Handler();
 
-    private Subscription mProcessImageSubscriptions;
-    private Subscription mStartCameraSubscription;
+    private Disposable mProcessImageSubscriptions;
+    private Disposable mStartCameraSubscription;
 
     //private View vFocusCircle;
     private View vFlashContainer;
@@ -235,8 +237,8 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
         mRecordHandler.removeCallbacksAndMessages(null);
         mShowPreviewHandler.removeCallbacksAndMessages(null);
 
-        if (mStartCameraSubscription != null) mStartCameraSubscription.unsubscribe();
-        if (mProcessImageSubscriptions != null) mProcessImageSubscriptions.unsubscribe();
+        if (mStartCameraSubscription != null) mStartCameraSubscription.dispose();
+        if (mProcessImageSubscriptions != null) mProcessImageSubscriptions.dispose();
 
         // stop the preview
         if (mCamera != null) {
@@ -316,34 +318,30 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     private void restartPreview() {
         if (mCamera != null) {
 
-            mStartCameraSubscription = Observable.create(new Observable.OnSubscribe<Void>() {
+            mStartCameraSubscription = Completable.fromAction(new Action() {
                 @Override
-                public void call(Subscriber<? super Void> subscriber) {
+                public void run() {
                     mIsSafeToTakePhoto = false;
                     setCameraFocusReady(false);
                     stopCameraPreview();
                     mCamera.release();
                     mCamera = null;
-                    subscriber.onCompleted();
                 }
             }).subscribeOn(io())
                     .observeOn(mainThread())
                     .subscribe(
-                            new Subscriber<Void>() {
+                            new Action() {
                                 @Override
-                                public void onCompleted() {
+                                public void run() {
                                     if (getCamera(mCameraID)) { //were able to find a camera to use
                                         startCameraPreview();
                                     }
                                 }
-
+                            },
+                            new Consumer<Throwable>() {
                                 @Override
-                                public void onError(Throwable e) {
+                                public void accept(Throwable e) {
                                     e.printStackTrace();
-                                }
-
-                                @Override
-                                public void onNext(Void aVoid) {
                                 }
                             });
         } else if (getCamera(mCameraID)) { //were able to find a camera to use
@@ -474,15 +472,15 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
         if (getActivity() == null) return;
 
         mProcessImageSubscriptions =
-                Observable.just(ImageUtility.savePicture(getActivity(), rotateImage(data)))
+                Observable.just(Optional.ofNullable(ImageUtility.savePicture(getActivity(), rotateImage(data))))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<Uri>() {
+                        .subscribe(new Consumer<Optional<Uri>>() {
                             @Override
-                            public void call(Uri uri) {
+                            public void accept(Optional<Uri> uri) {
                                 ProfileCameraActivity activity = (ProfileCameraActivity) getActivity();
                                 if (activity != null){
-                                    activity.replaceFragment(ConfirmProfilePicture.newInstance(uri));
+                                    activity.replaceFragment(ConfirmProfilePicture.newInstance(uri.orElse(null)));
                                 }
                             }
                         });

@@ -2,6 +2,7 @@ package com.linute.linute;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
@@ -10,10 +11,15 @@ import com.linute.linute.API.SessionExpiry;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
+import io.reactivex.rxjava3.exceptions.UndeliverableException;
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
+
 /**
  * Created by QiFeng on 8/11/16.
  */
 public class TaptApplication extends MultiDexApplication {
+
+    private static final String TAG = TaptApplication.class.getSimpleName();
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -38,6 +44,17 @@ public class TaptApplication extends MultiDexApplication {
 
         SingleVideoPlaybackManager.initManager(this);
         SessionExpiry.init(this);
+
+        // An error after a dispose has nowhere to go, like the camera failing while the screen
+        // closes. RxJava 1 dropped those, but RxJava 3 would crash the app.
+        RxJavaPlugins.setErrorHandler(e -> {
+            if (e instanceof UndeliverableException) {
+                Log.w(TAG, "Error after dispose", e);
+            } else {
+                Thread thread = Thread.currentThread();
+                thread.getUncaughtExceptionHandler().uncaughtException(thread, e);
+            }
+        });
     }
 
 }

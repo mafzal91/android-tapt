@@ -48,13 +48,14 @@ import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 import java.io.IOException;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Consumer;
 
-import static rx.schedulers.Schedulers.io;
-import static rx.android.schedulers.AndroidSchedulers.mainThread;
+import static io.reactivex.rxjava3.schedulers.Schedulers.io;
+import static io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread;
 
 @SuppressWarnings("deprecation")
 public class CameraFragment extends Fragment {
@@ -91,8 +92,8 @@ public class CameraFragment extends Fragment {
 
     private Handler mRecordHandler = new Handler();
 
-    private Subscription mProcessImageSubscriptions;
-    private Subscription mStartCameraSubscription;
+    private Disposable mProcessImageSubscriptions;
+    private Disposable mStartCameraSubscription;
 
     private boolean mIsRecording = false;
     private boolean mSurfaceAlreadyCreated = false;
@@ -440,34 +441,30 @@ public class CameraFragment extends Fragment {
     private void restartPreview() {
         if (mCamera != null) {
 
-            mStartCameraSubscription = Observable.create(new Observable.OnSubscribe<Void>() {
+            mStartCameraSubscription = Completable.fromAction(new Action() {
                 @Override
-                public void call(Subscriber<? super Void> subscriber) {
+                public void run() {
                     setSafeToTakePhoto(false);
                     setCameraFocusReady(false);
                     stopCameraPreview();
                     mCamera.release();
                     mCamera = null;
-                    subscriber.onCompleted();
                 }
             }).subscribeOn(io())
                     .observeOn(mainThread())
                     .subscribe(
-                            new Subscriber<Void>() {
+                            new Action() {
                                 @Override
-                                public void onCompleted() {
+                                public void run() {
                                     if (getCamera(mCameraID)) { //were able to find a camera to use
                                         startCameraPreview();
                                     }
                                 }
-
+                            },
+                            new Consumer<Throwable>() {
                                 @Override
-                                public void onError(Throwable e) {
+                                public void accept(Throwable e) {
                                     e.printStackTrace();
-                                }
-
-                                @Override
-                                public void onNext(Void aVoid) {
                                 }
                             });
         } else if (getCamera(mCameraID)) { //were able to find a camera to use
@@ -693,8 +690,8 @@ public class CameraFragment extends Fragment {
 
         mShowCameraHandler.removeCallbacks(mShowPreview);
 
-        if (mStartCameraSubscription != null) mStartCameraSubscription.unsubscribe();
-        if (mProcessImageSubscriptions != null) mProcessImageSubscriptions.unsubscribe();
+        if (mStartCameraSubscription != null) mStartCameraSubscription.dispose();
+        if (mProcessImageSubscriptions != null) mProcessImageSubscriptions.dispose();
 
         if (mIsRecording && !mVideoProcessing) {
             mTakePhotoBtn.setImageResource(R.drawable.square_camera_unselected);
@@ -740,14 +737,14 @@ public class CameraFragment extends Fragment {
 
     private void takeImageOfView() {
 //        subscriber.onNext(ImageUtility.savePicture(getActivity(), mPreviewView.getBitmap()));
-        mProcessImageSubscriptions = Observable
-                .just(stopCamera())
+        stopCamera();
+        mProcessImageSubscriptions = Completable.complete()
                 .subscribeOn(io())
                 .observeOn(mainThread())
                 .subscribe(
-                        new Action1<Void>() {
+                        new Action() {
                             @Override
-                            public void call(Void aVoid) {
+                            public void run() {
                                 if (getActivity() == null) return;
 
                                 final int returnType = ((CameraActivity) getActivity()).getReturnType();
@@ -757,9 +754,9 @@ public class CameraFragment extends Fragment {
                                         .subscribeOn(io())
                                         .observeOn(mainThread())
                                         .subscribe(
-                                                new Action1<Uri>() {
+                                                new Consumer<Uri>() {
                                                     @Override
-                                                    public void call(Uri uri) {
+                                                    public void accept(Uri uri) {
 
                                                         BitmapFactory.Options options = new BitmapFactory.Options();
                                                         options.inJustDecodeBounds = true;
@@ -813,9 +810,8 @@ public class CameraFragment extends Fragment {
         return uri;
     }
 
-    private Void stopCamera() {
+    private void stopCamera() {
         mCamera.stopPreview();
-        return null;
     }
 
 

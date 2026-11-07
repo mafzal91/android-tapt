@@ -19,13 +19,13 @@ import com.lyft.android.scissors.CropView;
 import java.io.File;
 import java.util.Date;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Action;
 
 import static android.graphics.Bitmap.CompressFormat.JPEG;
-import static rx.android.schedulers.AndroidSchedulers.mainThread;
-import static rx.schedulers.Schedulers.io;
+import static io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread;
+import static io.reactivex.rxjava3.schedulers.Schedulers.io;
 
 /**
  * Created by QiFeng on 7/5/16.
@@ -36,7 +36,7 @@ public class ProfilePictureGalleryFragment extends BaseFragment{
 
     private static final int REQUEST_PICK = 123;
     private CropView vCropView;
-    private Subscription mSubscription;
+    private Disposable mSubscription;
 
 
     @Nullable
@@ -96,17 +96,17 @@ public class ProfilePictureGalleryFragment extends BaseFragment{
 
         final File croppedFile = new File(getActivity().getCacheDir(), new Date().getTime() + "");
 
-        mSubscription = Observable
-                .from(vCropView.extensions()
+        mSubscription = Completable
+                .fromFuture(vCropView.extensions()
                         .crop()
                         .quality(100)
                         .format(JPEG)
                         .into(croppedFile))
                 .subscribeOn(io())
                 .observeOn(mainThread())
-                .subscribe(new Action1<Void>() {
+                .subscribe(new Action() {
                     @Override
-                    public void call(Void nothing) {
+                    public void run() {
                         ProfileCameraActivity activity = (ProfileCameraActivity) getActivity();
                         if (activity != null) {
                             activity.replaceFragment(
@@ -120,6 +120,6 @@ public class ProfilePictureGalleryFragment extends BaseFragment{
     @Override
     public void onPause() {
         super.onPause();
-        if (mSubscription != null) mSubscription.unsubscribe();
+        if (mSubscription != null) mSubscription.dispose();
     }
 }

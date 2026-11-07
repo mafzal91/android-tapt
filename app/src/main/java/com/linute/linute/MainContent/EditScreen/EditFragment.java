@@ -76,16 +76,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import rx.Observable;
-import rx.Subscription;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Consumer;
 
-import static rx.android.schedulers.AndroidSchedulers.mainThread;
-import static rx.schedulers.Schedulers.io;
+import static io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread;
+import static io.reactivex.rxjava3.schedulers.Schedulers.io;
 
 /**
  * Created by mikhail on 8/22/16.
@@ -146,7 +147,7 @@ public class EditFragment extends BaseFragment {
     private int mReturnType;
 //    private int mCameraType;
 
-    Subscription mSubscription;
+    Disposable mSubscription;
 
     private String mCollegeId;
     private String mUserId;
@@ -881,12 +882,13 @@ public class EditFragment extends BaseFragment {
         }
 
         if (mReturnType != CameraActivity.SEND_POST) {
-            mSubscription = Observable.just(ImageUtility.savePictureToCache(getActivity(), bitmap))
-                    .observeOn(io())
-                    .subscribeOn(mainThread())
-                    .subscribe(new Action1<Uri>() {
+            mSubscription = Observable.just(Optional.ofNullable(ImageUtility.savePictureToCache(getActivity(), bitmap)))
+                    .subscribeOn(io())
+                    .observeOn(mainThread())
+                    .subscribe(new Consumer<Optional<Uri>>() {
                         @Override
-                        public void call(Uri uri) {
+                        public void accept(Optional<Uri> saved) {
+                            Uri uri = saved.orElse(null);
                             if (uri != null) {
                                 Intent i = new Intent()
                                         .putExtra("image", uri)
@@ -907,12 +909,13 @@ public class EditFragment extends BaseFragment {
                         }
                     });
         } else {
-            mSubscription = Observable.just(ImageUtility.savePicture(getActivity(), bitmap))
+            mSubscription = Observable.just(Optional.ofNullable(ImageUtility.savePicture(getActivity(), bitmap)))
                     .subscribeOn(io())
                     .observeOn(mainThread())
-                    .subscribe(new Action1<Uri>() {
+                    .subscribe(new Consumer<Optional<Uri>>() {
                         @Override
-                        public void call(Uri uri) {
+                        public void accept(Optional<Uri> saved) {
+                            Uri uri = saved.orElse(null);
                             if (uri != null) {
 
                                 PendingUploadPost pendingUploadPost =
@@ -952,7 +955,7 @@ public class EditFragment extends BaseFragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (mSubscription != null) mSubscription.unsubscribe();
+        if (mSubscription != null) mSubscription.dispose();
 
         if (mContentView != null && mContentView instanceof TextureVideoView) {
             ((TextureVideoView) mContentView).stopPlayback();

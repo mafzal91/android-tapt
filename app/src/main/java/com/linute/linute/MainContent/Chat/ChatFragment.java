@@ -70,9 +70,9 @@ import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import rx.Observable;
-import rx.Subscriber;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -747,9 +747,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void sendVideo(final BaseTaptActivity activity) {
-        Observable.create(new Observable.OnSubscribe<Void>() {
+        Completable.fromAction(new Action() {
             @Override
-            public void call(Subscriber<? super Void> subscriber) {
+            public void run() {
                 try {
                     JSONObject postData = new JSONObject();
                     postData.put("message", mMessageText);
@@ -812,9 +812,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void sendImage(final BaseTaptActivity activity) {
-        Observable.create(new Observable.OnSubscribe<Void>() {
+        Completable.fromAction(new Action() {
             @Override
-            public void call(Subscriber<? super Void> subscriber) {
+            public void run() {
                 try {
                     JSONObject postData = new JSONObject();
                     postData.put("message", mMessageText);
