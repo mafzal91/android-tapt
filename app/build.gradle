@@ -1,20 +1,17 @@
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
-// The backend's MEDIA_URL, e.g. https://<bucket>.s3.amazonaws.com. Set
-// tapt.mediaUrl in ~/.gradle/gradle.properties or pass -Ptapt.mediaUrl=...
-def mediaUrl = (findProperty('tapt.mediaUrl') ?: '').toString().replaceAll('/+$', '')
-if (!mediaUrl) {
-    logger.warn("tapt.mediaUrl is not set; images and videos will not load.")
-    mediaUrl = 'https://tapt-media-url-not-set.invalid'
-}
+// The backend's MEDIA_URL: the R2 bucket's public domain. Override with
+// tapt.mediaUrl in ~/.gradle/gradle.properties or -Ptapt.mediaUrl=...
+def mediaUrl = (findProperty('tapt.mediaUrl') ?: 'https://media.tapt.mafz.al').toString().replaceAll('/+$', '')
 
 android {
+    // The Java package stays com.linute.linute; only the installed app id is new.
     namespace 'com.linute.linute'
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.linute.linute"
+        applicationId "al.mafz.tapt"
         minSdk 24
         targetSdk 35
         versionCode 43

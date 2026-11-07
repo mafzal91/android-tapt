@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Debug builds only. The backend's local mode (NODE_ENV=local) serves plain
+    HTTP on port 80 at api.gettapt, which targetSdk 35 blocks by default.
+    Everything else keeps the platform default (HTTPS only). See SETUP.md.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">api.gettapt</domain>
+    </domain-config>
+</network-security-config>

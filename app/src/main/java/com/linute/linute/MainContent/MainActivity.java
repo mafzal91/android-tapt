@@ -210,7 +210,7 @@ public class MainActivity extends BaseTaptActivity {
             checkIntent(intent);
         }
 
-        new FiveStarsDialog(this, "support@tapt.io")
+        new FiveStarsDialog(this, "support@tapt.mafz.al")
                 .setRateText("How are we doing?")
                 .setRateText("Wasup! We see you come here often, how are you liking it so far?")
                 .setUpperBound(4)

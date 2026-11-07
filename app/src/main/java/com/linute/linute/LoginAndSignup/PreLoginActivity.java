@@ -50,7 +50,7 @@ public class PreLoginActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
                     intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.io"});
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.mafz.al"});
                     intent.putExtra(Intent.EXTRA_SUBJECT, "Help Me Plz");
                     intent.putExtra(android.content.Intent.EXTRA_TEXT,
                             "If you are having issues with your signin (ie. not receiving pincode, " +
