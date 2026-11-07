@@ -58,7 +58,7 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
-import com.linute.linute.MainContent.Uploading.UploadIntentService;
+import com.linute.linute.MainContent.Uploading.UploadWorker;
 import com.linute.linute.ModesDisabled;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
@@ -404,9 +404,10 @@ public class MainActivity extends BaseTaptActivity {
             setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
         } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
-            Intent intent = new Intent(this, UploadIntentService.class);
-            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, (android.os.Parcelable) data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
-            startService(intent);
+            PendingUploadPost post = data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY);
+            if (post != null) {
+                UploadWorker.enqueue(this, post);
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
