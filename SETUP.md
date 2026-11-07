@@ -17,6 +17,12 @@ sideloaded by a few people, not published.
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
+Device tests need a running emulator or a connected phone:
+
+```sh
+./gradlew :app:connectedDebugAndroidTest
+```
+
 `assembleRelease` builds an unsigned, minified APK. There is no release signing
 config. For a handful of friends the debug APK is enough.
 
@@ -100,10 +106,6 @@ password `pass1234`, which is the quickest way to get an account to log in with.
 
 ## Known gaps
 
-- **Video processing.** `com.writingminds:FFmpegAndroid` runs a bundled ffmpeg
-  binary from app storage. Android 10+ blocks executing files from app data
-  at targetSdk 29+, and the binary is 32-bit ARM only. Expect video posting,
-  video edits and video sharing to fail until it is replaced.
 - **Uploads stop in the background.** `UploadIntentService` is a plain
   started service, so Android 8+ may stop it about a minute after the app
   leaves the foreground.
@@ -125,9 +127,12 @@ password `pass1234`, which is the quickest way to get an account to log in with.
   Earlier, without a server: camera, saving to `Pictures/Tapt`, the gallery
   picker (`READ_MEDIA_*`) and the editor's tools.
 
+  Video export (Media3 Transformer) has device tests on an API 35 emulator,
+  including the edit screen with a gallery video.
+
   Not covered anywhere: posts with an image, media loading from
-  `media.tapt.mafz.al`, push, sign-up past the college step, video recording
-  and the FFmpeg path.
+  `media.tapt.mafz.al`, push, sign-up past the college step, recording video
+  with the camera, and sharing a video from a real server URL.
 
 ## Domains and names
 
