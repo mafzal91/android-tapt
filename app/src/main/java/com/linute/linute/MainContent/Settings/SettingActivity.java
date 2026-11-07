@@ -12,7 +12,6 @@ import android.view.View;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.BuildConfig;
-import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.CollegePickerActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
@@ -29,8 +28,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
-
-import io.realm.Realm;
 
 
 public class SettingActivity extends BaseSocketActivity {
@@ -155,12 +152,9 @@ public class SettingActivity extends BaseSocketActivity {
 
         Preference mChangeCollege;
 
-        private Realm mRealm;
-
         @Override
         public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            mRealm = Realm.getDefaultInstance();
             addPreferencesFromResource(R.xml.pref_profile_frag_main);
 
             bindPreferences();
@@ -210,24 +204,10 @@ public class SettingActivity extends BaseSocketActivity {
                     TaptSocket.getInstance().forceDisconnect();
                     TaptSocket.clear();
 
-                    mRealm.executeTransactionAsync(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            realm.delete(TaptUser.class);
-
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Intent i = new Intent(getActivity(), PreLoginActivity.class);
-                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
-                                        startActivity(i);
-                                        getActivity().finish();
-                                    }
-                                });
-                            }
-                        }
-                    });
+                    Intent i = new Intent(getActivity(), PreLoginActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
+                    startActivity(i);
+                    getActivity().finish();
 
                     return true;
                 }
@@ -366,12 +346,6 @@ public class SettingActivity extends BaseSocketActivity {
                     }
                 });
             }
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            mRealm.close();
         }
     }
 }

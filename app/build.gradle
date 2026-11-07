@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'realm-android'
 
 // The backend's MEDIA_URL: the R2 bucket's public domain. Override with
 // tapt.mediaUrl in ~/.gradle/gradle.properties or -Ptapt.mediaUrl=...
@@ -83,7 +82,7 @@ dependencies {
     implementation 'com.getbase:floatingactionbutton:1.10.1'
     implementation 'androidx.multidex:multidex:2.0.1'
     //new
-    // org.bson.types.ObjectId comes from the bson jar that Realm 10 pulls in.
+    // org.bson.types.ObjectId, for ids the app makes itself
     implementation 'org.mongodb:bson:3.12.1'
     implementation 'com.github.lzyzsd:CircleProgress:v1.2.0'
     implementation 'androidx.work:work-runtime:2.12.0'
