@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.EditScreen.Tools;
 
+import java.io.IOException;
+import android.util.Log;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,6 +33,8 @@ import java.util.ArrayList;
  * Created by mikhail on 8/23/16.
  */
 public class OverlaysTool extends EditContentTool {
+
+    private static final String TAG = OverlaysTool.class.getSimpleName();
 
     ArrayList<Overlay> mOverlays;
     private OverlaysAdapter mOverlaysAdapter;
@@ -81,7 +85,7 @@ public class OverlaysTool extends EditContentTool {
 
                 //do after decoding
                 if (mDestroyed) {
-                    mBackingBitmap.recycle();
+                    if (mBackingBitmap != null) mBackingBitmap.recycle();
                 } else {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
@@ -103,8 +107,21 @@ public class OverlaysTool extends EditContentTool {
             @Override
             public void run() {
                 final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(uri.getPath());
-                Bitmap frame = retriever.getFrameAtTime(0);
+                Bitmap frame;
+                try {
+                    retriever.setDataSource(uri.getPath());
+                    frame = retriever.getFrameAtTime(0);
+                } catch (RuntimeException e) {
+                    // The camera deletes its video when it closes, which can be before this runs
+                    Log.w(TAG, "setVideoBackground: can't read the video", e);
+                    return;
+                } finally {
+                    try {
+                        retriever.release();
+                    } catch (IOException ignored) {
+                    }
+                }
+                if (frame == null) return;
 
                 if (!mDestroyed) {
                     float scale = (float) screenwidth / 5 / frame.getWidth();
@@ -124,7 +141,7 @@ public class OverlaysTool extends EditContentTool {
                 }
 
                 //check one more time after finishing
-                if (mDestroyed) {
+                if (mDestroyed && mBackingBitmap != null) {
                     mBackingBitmap.recycle();
                 }
 

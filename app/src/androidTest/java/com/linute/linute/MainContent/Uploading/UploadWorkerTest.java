@@ -75,6 +75,8 @@ public class UploadWorkerTest {
         workManager.cancelUniqueWork(UploadWorker.UNIQUE_WORK).getResult().get();
         workManager.pruneWork().getResult().get();
         notificationManager().cancelAll();
+        File[] saved = savedPosts().listFiles();
+        if (saved != null) for (File post : saved) post.delete();
 
         mRealClient = API_Methods.CLIENT;
         API_Methods.CLIENT = new OkHttpClient.Builder().addInterceptor(mServer).build();
@@ -198,6 +200,27 @@ public class UploadWorkerTest {
     }
 
     @Test
+    public void aPostTooBigForWorkManagerStillPostsAndIsCleanedUp() throws Exception {
+        // WorkManager's own storage holds at most 10KB
+        StringBuilder title = new StringBuilder();
+        for (int i = 0; i < 5000; i++) title.append("\uD83D\uDE00 ");
+        ArrayList<String> people = new ArrayList<>();
+        for (int i = 0; i < 500; i++) people.add(String.format("%024d", i));
+
+        PendingUploadPost post = new PendingUploadPost("a", "college", 0, 0, title.toString(), 0,
+                Uri.fromFile(mImage).toString(), null, null, null, "owner", "token", null);
+        post.setShareParams(people, new ArrayList<>());
+        UploadWorker.enqueue(mContext, post);
+        waitForUploads();
+
+        JSONObject body = new JSONObject(mServer.bodies.get(0));
+        assertEquals(title.toString(), body.getString("title"));
+        assertEquals(500, body.getJSONArray("users").length());
+        waitForNotification(DONE);
+        assertEquals(0, savedPosts().listFiles().length);
+    }
+
+    @Test
     public void missingFileFailsWithoutCallingTheServer() throws Exception {
         assertTrue(mVideo.delete());
         UploadWorker.enqueue(mContext, post("a", mImage, mVideo));
@@ -236,6 +259,10 @@ public class UploadWorkerTest {
 
         assertEquals("b", new JSONObject(mServer.bodies.get(0)).getString("id"));
         waitForNotification(FAILED);
+    }
+
+    private File savedPosts() {
+        return new File(mContext.getFilesDir(), "uploads");
     }
 
     private PendingUploadPost post(String id, File image, File video) {
