@@ -600,7 +600,7 @@ public class EditFragment extends BaseFragment {
 
 //                vBottom.addView(mPlaying);
 
-                mVideoView.setBackgroundResource(R.color.pure_black);
+                mContentContainer.setBackgroundResource(R.color.pure_black);
 
                 if (mDimens.isFrontFacing) mVideoView.setScaleX(-1);
 
