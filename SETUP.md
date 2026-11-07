@@ -106,9 +106,10 @@ password `pass1234`, which is the quickest way to get an account to log in with.
 
 ## Known gaps
 
-- **Uploads stop in the background.** `UploadIntentService` is a plain
-  started service, so Android 8+ may stop it about a minute after the app
-  leaves the foreground.
+- **Large uploads run out of memory.** A post is sent as one JSON string with
+  the video in base64, so the app needs about seven times the file's size. On
+  a 192MB heap a 20MB video works and a 30MB one fails with "Tap to retry".
+  Videos are capped at 15 seconds, so this should be rare.
 - **Open-source attributions.** One license string in `values/strings.xml` is
   longer than aapt2 allows, so it shows as `STRING_TOO_LARGE`.
 - **Barely tested against production.** There is no production account
@@ -128,7 +129,8 @@ password `pass1234`, which is the quickest way to get an account to log in with.
   picker (`READ_MEDIA_*`) and the editor's tools.
 
   Video export (Media3 Transformer) has device tests on an API 35 emulator,
-  including the edit screen with a gallery video.
+  including the edit screen with a gallery video. Uploads have device tests
+  with the real WorkManager and a fake server.
 
   Not covered anywhere: posts with an image, media loading from
   `media.tapt.mafz.al`, push, sign-up past the college step, recording video

@@ -2,6 +2,8 @@ package com.linute.linute.API;
 
 import android.os.Build;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.linute.linute.BuildConfig;
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -54,7 +56,8 @@ public class API_Methods {
 
 
     // Shared so every call goes through the session-expiry check (and reuses connections).
-    private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+    @VisibleForTesting
+    public static OkHttpClient CLIENT = new OkHttpClient.Builder()
             .addInterceptor(SessionExpiry.INTERCEPTOR)
             .build();
 
