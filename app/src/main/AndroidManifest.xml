@@ -54,6 +54,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <service
             android:name=".API.RegistrationIntentService"
             android:exported="false" />
@@ -183,8 +184,8 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <service
-            android:name=".MainContent.DiscoverFragment.ShareService"
+        <receiver
+            android:name=".MainContent.DiscoverFragment.ShareReceiver"
             android:exported="false" />
 
         <activity android:name=".MainContent.Global.Articles.ArticleActivity"

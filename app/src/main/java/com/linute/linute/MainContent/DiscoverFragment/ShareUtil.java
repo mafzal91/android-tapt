@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.LabeledIntent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import androidx.core.content.FileProvider;
 import android.util.Log;
 
@@ -104,17 +103,12 @@ public class ShareUtil {
         }
         sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
         sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Intent shareIntent;
-        Intent callbackIntent = new Intent(context, ShareService.class);
-        callbackIntent.putExtra(ShareService.EXTRA_POST_ID, bfi.getId());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            // Mutable: the chooser fills in EXTRA_CHOSEN_COMPONENT.
-            PendingIntent callbackPendingIntent = PendingIntent.getService(context, ShareService.REQ_CODE, callbackIntent, PendingIntent.FLAG_MUTABLE);
-            shareIntent = Intent.createChooser(sendIntent, "Share", callbackPendingIntent.getIntentSender());
-        }else{
-            shareIntent = Intent.createChooser(sendIntent, "Share");
-            context.startService(callbackIntent);
-        }
+        Intent callbackIntent = new Intent(context, ShareReceiver.class);
+        callbackIntent.putExtra(ShareReceiver.EXTRA_POST_ID, bfi.getId());
+        // Mutable: the chooser fills in EXTRA_CHOSEN_COMPONENT. Update current: otherwise every
+        // later share reports the first post's id.
+        PendingIntent callbackPendingIntent = PendingIntent.getBroadcast(context, ShareReceiver.REQ_CODE, callbackIntent, PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent shareIntent = Intent.createChooser(sendIntent, "Share", callbackPendingIntent.getIntentSender());
 
         final Intent taptShareIntent = new Intent(context, SendToActivity.class);
         taptShareIntent.putExtra(SendToActivity.EXTRA_POST_ID, bfi.getId());
