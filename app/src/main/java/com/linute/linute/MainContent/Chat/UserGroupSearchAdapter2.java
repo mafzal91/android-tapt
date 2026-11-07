@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -25,13 +25,13 @@ public class UserGroupSearchAdapter2 extends UserSelectAdapter2 {
 
     public static final int ROOMS_LIST_INDEX = 1;
     public static final int USERS_LIST_INDEX = 2;
-    private final StringSignature mImageSign;
+    private final ObjectKey mImageSign;
     private OnUserClickListener onUserClickListener;
     private OnRoomClickListener onRoomClickListener;
 
     public UserGroupSearchAdapter2(Context aContext) {
         super(aContext);
-        mImageSign = new StringSignature(aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
+        mImageSign = new ObjectKey(aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
     }
 
     @Override
@@ -142,7 +142,7 @@ public class UserGroupSearchAdapter2 extends UserSelectAdapter2 {
                     .dontAnimate()
                     .signature(mImageSign)
                     .placeholder(R.color.seperator_color)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vUserImage);
 
 
@@ -159,7 +159,7 @@ public class UserGroupSearchAdapter2 extends UserSelectAdapter2 {
                     .dontAnimate()
                     .signature(mImageSign)
                     .placeholder(R.color.seperator_color)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vUserImage);
 
 

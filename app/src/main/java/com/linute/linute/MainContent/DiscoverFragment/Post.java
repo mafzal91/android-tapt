@@ -18,8 +18,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.FeedDetailFragment.Comment;
@@ -33,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -547,13 +548,13 @@ public class Post extends BaseFeedItem implements Parcelable {
     private void shareImagePost(final Context mContext, final OnUriReadyListener listener) {
         listener.onUriProgress(10);
 
-        Glide.with(mContext).load(getImage()).asBitmap().into(new SimpleTarget<Bitmap>(){
+        Glide.with(mContext).asBitmap().load(getImage()).into(new CustomTarget<Bitmap>(){
             @Override
-            public void onResourceReady(final Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+            public void onResourceReady(final Bitmap resource, Transition<? super Bitmap> transition) {
 
-                Glide.with(mContext).load(getUserImage()).asBitmap().into(new SimpleTarget<Bitmap>() {
+                Glide.with(mContext).asBitmap().load(getUserImage()).into(new CustomTarget<Bitmap>() {
                     @Override
-                    public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
+                    public void onResourceReady(Bitmap profileImage, Transition<? super Bitmap> transition) {
                         listener.onUriProgress(50);
 
                         View header = setupShareHeader(profileImage, mContext);
@@ -590,17 +591,23 @@ public class Post extends BaseFeedItem implements Parcelable {
                     }
 
                     @Override
-                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        super.onLoadFailed(e, errorDrawable);
-                        listener.onUriFail(e);
+                    public void onLoadFailed(Drawable errorDrawable) {
+                        listener.onUriFail(new IOException("Image failed to load"));
+                    }
+
+                    @Override
+                    public void onLoadCleared(Drawable placeholder) {
                     }
                 });
             }
 
             @Override
-            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                super.onLoadFailed(e, errorDrawable);
-                listener.onUriFail(e);
+            public void onLoadFailed(Drawable errorDrawable) {
+                listener.onUriFail(new IOException("Image failed to load"));
+            }
+
+            @Override
+            public void onLoadCleared(Drawable placeholder) {
             }
         });
     }
@@ -624,9 +631,9 @@ public class Post extends BaseFeedItem implements Parcelable {
     private void shareVideoPost(final Context mContext, final OnUriReadyListener listener) {
         final String outputFile = ImageUtility.getVideoUri();
 
-        Glide.with(mContext).load(getUserImage()).asBitmap().into(new SimpleTarget<Bitmap>() {
+        Glide.with(mContext).asBitmap().load(getUserImage()).into(new CustomTarget<Bitmap>() {
             @Override
-            public void onResourceReady(Bitmap profileImage, GlideAnimation<? super Bitmap> glideAnimation) {
+            public void onResourceReady(Bitmap profileImage, Transition<? super Bitmap> transition) {
                 //todo don't make an entire holder, inflate the header and draw that alone, then the bitmap
 
                 View header = setupShareHeader(profileImage, mContext);
@@ -660,6 +667,10 @@ public class Post extends BaseFeedItem implements Parcelable {
                                 listener.onUriFail(e);
                             }
                         });
+            }
+
+            @Override
+            public void onLoadCleared(Drawable placeholder) {
             }
         });
     }

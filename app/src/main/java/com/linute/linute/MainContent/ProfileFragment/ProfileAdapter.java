@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
@@ -329,9 +329,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mRequestManager
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
                     .dontAnimate()
-                    .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
+                    .signature(new ObjectKey(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vProfilePicture);
 
             String full = mUser.getFirstName() + " " + mUser.getLastName();

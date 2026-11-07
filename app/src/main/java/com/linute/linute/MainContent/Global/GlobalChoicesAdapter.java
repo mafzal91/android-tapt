@@ -124,7 +124,7 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .load(Utils.getTrendsImageURL(item.imageUrl))
                     .dontAnimate()
                     .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .placeholder(R.color.seperator_color)
                     .into(vImage);
 

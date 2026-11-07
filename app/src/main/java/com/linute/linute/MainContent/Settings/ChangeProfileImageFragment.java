@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Util;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
@@ -146,11 +146,11 @@ public class ChangeProfileImageFragment extends Fragment {
 
     private void setDefaultValues() {
         Glide.with(this)
-                .load(Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", "")))
                 .asBitmap()
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .load(Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", "")))
+                .signature(new ObjectKey(mSharedPreferences.getString("imageSigniture", "000")))
                 .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                 .into(mImageView);
     }
 
@@ -248,8 +248,8 @@ public class ChangeProfileImageFragment extends Fragment {
             mImageUri = data.getData();
             if (mImageUri != null) {
                 Glide.with(this)
-                        .load(mImageUri)
                         .asBitmap()
+                        .load(mImageUri)
                         .placeholder(android.R.color.black)
                         .dontAnimate()
                         .into(mImageView);

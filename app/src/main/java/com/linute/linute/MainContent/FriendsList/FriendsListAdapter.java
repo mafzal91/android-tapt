@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -139,8 +139,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     .load(Utils.getImageUrlOfUser(mFollowing ? friend.getOwnerProfile() : friend.getUserProfile()))
                     .dontAnimate()
                     .placeholder(R.drawable.image_loading_background)
-                    .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .signature(new ObjectKey(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(mProfilePicture);
 
             mUserName.setText(mFollowing ? friend.getOwnerName() : friend.getUserName());

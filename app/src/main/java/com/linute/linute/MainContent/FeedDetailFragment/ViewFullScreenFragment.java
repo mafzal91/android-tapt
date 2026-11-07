@@ -17,6 +17,8 @@ import android.view.animation.Animation;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.linute.linute.API.API_Methods;
@@ -222,16 +224,16 @@ public class ViewFullScreenFragment extends BaseFragment {
 
             vLoadingText.setVisibility(View.VISIBLE);
             Glide.with(this)
-                    .load(mLink)
                     .asBitmap()
-                    .listener(new RequestListener<Uri, Bitmap>() {
+                    .load(mLink)
+                    .listener(new RequestListener<Bitmap>() {
                         @Override
-                        public boolean onException(Exception e, Uri model, Target<Bitmap> target, boolean isFirstResource) {
+                        public boolean onLoadFailed(GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
                             return false;
                         }
 
                         @Override
-                        public boolean onResourceReady(Bitmap resource, Uri model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                             //hide loading when finished loading image
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             vLoadingText.setVisibility(View.GONE);

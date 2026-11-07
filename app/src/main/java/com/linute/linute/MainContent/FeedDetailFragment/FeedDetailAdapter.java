@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.MainContent.DiscoverFragment.Poll;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -414,21 +414,21 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         public void setProfileImage(String image) {
             mRequestManager
-                    .load(Utils.getImageUrlOfUser(image))
                     .asBitmap()
-                    .signature(new StringSignature(mImageSignature))
+                    .load(Utils.getImageUrlOfUser(image))
+                    .signature(new ObjectKey(mImageSignature))
                     .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vCommentUserImage);
         }
 
         public void setAnonImage(String image) {
             mRequestManager
-                    .load(image == null || image.isEmpty() ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(image))
                     .asBitmap()
-                    .signature(new StringSignature(mImageSignature))
+                    .load(image == null || image.isEmpty() ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(image))
+                    .signature(new ObjectKey(mImageSignature))
                     .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vCommentUserImage);
         }
     }
@@ -607,8 +607,8 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         @Override
         protected void bindContent(Comment comment) {
             mImageUrl = Utils.getCommentImageUrl(comment.getImageUrl());
-            mRequestManager.load(mImageUrl)
-                    .asBitmap()
+            mRequestManager.asBitmap()
+                    .load(mImageUrl)
                     .placeholder(R.color.seperator_color)
                     .into(vImageView);
         }

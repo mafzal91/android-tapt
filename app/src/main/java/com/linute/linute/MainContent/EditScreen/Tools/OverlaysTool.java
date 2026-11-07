@@ -173,7 +173,7 @@ public class OverlaysTool extends EditContentTool {
                     mRequestManager
                             .load(overlay.file)
                             .dontAnimate()
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                             .into(overlayView);
 
                 mSelectedOverlay = overlay;

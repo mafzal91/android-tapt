@@ -8,7 +8,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
@@ -44,11 +44,11 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     void bindModel(Post userActivityItem) {
         //profile image on the right
         Glide.with(mContext)
-                .load(userActivityItem.getImage())
                 .asBitmap()
+                .load(userActivityItem.getImage())
                 .placeholder(R.drawable.image_loading_background)
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                .signature(new ObjectKey(mSharedPreferences.getString("imageSigniture", "000")))
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .into(vEventImage);
 
         vCinemaIcon.setVisibility(userActivityItem.isVideoPost() ? View.VISIBLE : View.GONE);

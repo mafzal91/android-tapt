@@ -34,7 +34,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linkedin.android.spyglass.mentions.MentionSpan;
 import com.linkedin.android.spyglass.suggestions.SuggestionsResult;
 import com.linkedin.android.spyglass.suggestions.interfaces.SuggestionsResultListener;
@@ -1440,11 +1440,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             public void bindView(final MentionedPerson person) {
                 mName.setText(person.getFullname());
                 Glide.with(FeedDetailPage.this)
-                        .load(Utils.getImageUrlOfUser(person.getProfileImage()))
                         .asBitmap()
-                        .signature(new StringSignature(mImageSignature))
+                        .load(Utils.getImageUrlOfUser(person.getProfileImage()))
+                        .signature(new ObjectKey(mImageSignature))
                         .placeholder(R.drawable.image_loading_background)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                         .into(mProfileImageView);
 
                 itemView.setOnClickListener(new View.OnClickListener() {

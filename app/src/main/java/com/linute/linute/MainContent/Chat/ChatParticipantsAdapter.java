@@ -127,8 +127,8 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         public void bind(User user){
             String imageUrlOfUser = Utils.getImageUrlOfUser(user.userImage);
             mRequestManager
-                    .load(imageUrlOfUser)
                     .asBitmap()
+                    .load(imageUrlOfUser)
                     .placeholder(R.color.seperator_color)
                     .into(profileImageIV);
             nameTV.setText(user.getFullName());
