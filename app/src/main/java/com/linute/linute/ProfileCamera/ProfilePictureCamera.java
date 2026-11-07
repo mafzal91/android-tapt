@@ -5,77 +5,77 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
-import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.core.Preview;
+import androidx.camera.core.resolutionselector.ResolutionSelector;
+import androidx.camera.core.resolutionselector.ResolutionStrategy;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
+import android.util.Size;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraPreviewLayout;
 import com.linute.linute.SquareCamera.CameraSettingPreferences;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.StoragePermissions;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
-import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-import static io.reactivex.rxjava3.android.schedulers.AndroidSchedulers.mainThread;
-import static io.reactivex.rxjava3.schedulers.Schedulers.io;
-
 /**
  * Created by QiFeng on 7/5/16.
  */
-@SuppressWarnings("deprecation")
-public class ProfilePictureCamera extends Fragment implements Camera.PictureCallback, Camera.ShutterCallback {
+public class ProfilePictureCamera extends Fragment {
 
     public static final String TAG = ProfilePictureCamera.class.getSimpleName();
     public static final String CAMERA_ID_KEY = "camera_id";
     public static final String CAMERA_FLASH_KEY = "flash_on";
 
+    //largest 4:3 photo to ask for
+    private static final Size MAX_PICTURE_SIZE = new Size(3000, 2250);
+
+    private ProcessCameraProvider mCameraProvider;
     private Camera mCamera;
+    private ImageCapture mImageCapture;
 
     private int mCameraID;
     private boolean mFlashOn;
 
-    private SurfaceTexture mSurfaceHolder;
-
-
-    private Handler mRecordHandler = new Handler();
-    private Handler mShowPreviewHandler = new Handler();
-
     private Disposable mProcessImageSubscriptions;
-    private Disposable mStartCameraSubscription;
 
     //private View vFocusCircle;
     private View vFlashContainer;
     private ImageView vFlashIcon;
-    private SquareCameraPreview vPreviewView;
+    private View vReverseCamera;
+    private CameraPreviewLayout vPreviewView;
 
-    private boolean mSurfaceAlreadyCreated = false;
     private boolean mIsSafeToTakePhoto = false;
 
 
@@ -99,14 +99,14 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     private int getFrontCameraID() {
         PackageManager pm = getActivity().getPackageManager();
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)) {
-            return Camera.CameraInfo.CAMERA_FACING_FRONT;
+            return CameraSelector.LENS_FACING_FRONT;
         }
 
         return getBackCameraID();
     }
 
     private int getBackCameraID() {
-        return Camera.CameraInfo.CAMERA_FACING_BACK;
+        return CameraSelector.LENS_FACING_BACK;
     }
 
     @Nullable
@@ -116,7 +116,7 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
 
         vFlashContainer = root.findViewById(R.id.flash_container);
         vFlashIcon = (ImageView) vFlashContainer.findViewById(R.id.flash_icon);
-        vPreviewView = (SquareCameraPreview) root.findViewById(R.id.camera_preview_view);
+        vPreviewView = (CameraPreviewLayout) root.findViewById(R.id.camera_preview_view);
 
         Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -128,22 +128,18 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
             }
         });
 
-        View reverseCam = root.findViewById(R.id.reverse_container);
-        if (Camera.getNumberOfCameras() < 2) {
-            reverseCam.setVisibility(View.INVISIBLE);
-        } else {
-            reverseCam.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mCameraID == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                        mCameraID = getBackCameraID();
-                    } else {
-                        mCameraID = getFrontCameraID();
-                    }
-                    restartPreview();
+        vReverseCamera = root.findViewById(R.id.reverse_container);
+        vReverseCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCameraID == CameraSelector.LENS_FACING_FRONT) {
+                    mCameraID = getBackCameraID();
+                } else {
+                    mCameraID = getFrontCameraID();
                 }
-            });
-        }
+                bindCamera();
+            }
+        });
 
         root.findViewById(R.id.capture_image_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,63 +165,33 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        vPreviewView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                //Log.i(TAG, "onSurfaceTextureAvailable: ");
-                mSurfaceHolder = surface;
-                if (hasCameraAndWritePermission()) {
-                    mSurfaceAlreadyCreated = true;
-                    //start camera after slight delay. Without delay,
-                    //there is huge lag time between active and inactive app state
-                    mShowPreviewHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mCamera == null) restartPreview();
-                        }
-                    }, 250);
-                }
+        vPreviewView.getPreviewStreamState().observe(getViewLifecycleOwner(),
+                state -> mIsSafeToTakePhoto = state == PreviewView.StreamState.STREAMING);
+
+        ListenableFuture<ProcessCameraProvider> provider = ProcessCameraProvider.getInstance(requireContext());
+        provider.addListener(() -> {
+            try {
+                mCameraProvider = provider.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.d(TAG, "Can't start CameraX", e);
+                return;
             }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
+            if (getView() == null) return;
+            if (mCameraProvider.getAvailableCameraInfos().size() < 2) {
+                vReverseCamera.setVisibility(View.INVISIBLE);
             }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                mSurfaceAlreadyCreated = false;
-                mShowPreviewHandler.removeCallbacksAndMessages(null);
-                // stop the preview
-                if (mCamera != null) {
-                    // we will get a runtime exception if camera had already been released, either by onpause
-                    // or when we switched cameras
-
-                    stopCameraPreview();
-                    mCamera.release();
-                    mCamera = null;
-
-                }
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-            }
-        });
+            bindCamera();
+        }, ContextCompat.getMainExecutor(requireContext()));
     }
 
 
     @Override
     public void onResume() {
         super.onResume();
-        //restartPreview() is called when camera preview surface is created
-        //to prevent redundancy, only run this one if surfaceCreated() isn't called when fragment resumed
-        if (mSurfaceAlreadyCreated && hasCameraAndWritePermission()) {
-            if (mCamera == null) {
-                restartPreview();
-            }
+        if (mCamera == null) {
+            bindCamera();
+        } else {
+            mIsSafeToTakePhoto = vPreviewView.getPreviewStreamState().getValue() == PreviewView.StreamState.STREAMING;
         }
     }
 
@@ -234,27 +200,8 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     public void onPause() {
         super.onPause();
 
-        mRecordHandler.removeCallbacksAndMessages(null);
-        mShowPreviewHandler.removeCallbacksAndMessages(null);
-
-        if (mStartCameraSubscription != null) mStartCameraSubscription.dispose();
         if (mProcessImageSubscriptions != null) mProcessImageSubscriptions.dispose();
 
-        // stop the preview
-        if (mCamera != null) {
-            // we will get a runtime exception if camera had already been released, either by onpause
-            // or when we switched cameras
-            try {
-                mCamera.cancelAutoFocus();
-                stopCameraPreview();
-                mCamera.release();
-                mCamera = null;
-            } catch (RuntimeException e) {
-                Log.i(TAG, "onPause: release error : ignore");
-                mCamera.release();
-                mCamera = null;
-            }
-        }
         CameraSettingPreferences.saveCameraFlashMode(getActivity(), mFlashOn);
     }
 
@@ -273,31 +220,27 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
      * Take a picture
      */
     private void takePicture() {
-        if (mIsSafeToTakePhoto) {
+        if (mIsSafeToTakePhoto && mImageCapture != null) {
             mIsSafeToTakePhoto = false;
 
-            // can cause runtime exception if click take picture too quickly when activity starts
-            try {
-                if (mFlashOn) {
-                    mCamera.takePicture(this, null, null, this);
-                } else { //flash was off or flash failed to turn on
-                    mCamera.cancelAutoFocus();
-                    mCamera.autoFocus(new Camera.AutoFocusCallback() {
+            mImageCapture.takePicture(ContextCompat.getMainExecutor(requireContext()),
+                    new ImageCapture.OnImageCapturedCallback() {
                         @Override
-                        public void onAutoFocus(boolean success, Camera camera) {
-                            try {
-                                mCamera.takePicture(ProfilePictureCamera.this, null, null, ProfilePictureCamera.this);
-                            }catch (RuntimeException e){
-                                e.printStackTrace();
-                                mIsSafeToTakePhoto = true;
-                            }
+                        public void onCaptureStarted() {
+                            playShutterSound();
+                        }
+
+                        @Override
+                        public void onCaptureSuccess(@NonNull ImageProxy image) {
+                            onPictureTaken(image);
+                        }
+
+                        @Override
+                        public void onError(@NonNull ImageCaptureException e) {
+                            Log.d(TAG, "Can't take picture", e);
+                            mIsSafeToTakePhoto = true;
                         }
                     });
-                }
-            } catch (RuntimeException e) {
-                e.printStackTrace();
-                mIsSafeToTakePhoto = true;
-            }
         }
     }
 
@@ -313,163 +256,55 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     }
 
     /**
-     * Restart the camera preview
+     * Start the camera preview, replacing the one that's showing
      */
-    private void restartPreview() {
-        if (mCamera != null) {
+    private void bindCamera() {
+        if (mCameraProvider == null || getView() == null || !hasCameraAndWritePermission()) return;
 
-            mStartCameraSubscription = Completable.fromAction(new Action() {
-                @Override
-                public void run() {
-                    mIsSafeToTakePhoto = false;
-                    setCameraFocusReady(false);
-                    stopCameraPreview();
-                    mCamera.release();
-                    mCamera = null;
-                }
-            }).subscribeOn(io())
-                    .observeOn(mainThread())
-                    .subscribe(
-                            new Action() {
-                                @Override
-                                public void run() {
-                                    if (getCamera(mCameraID)) { //were able to find a camera to use
-                                        startCameraPreview();
-                                    }
-                                }
-                            },
-                            new Consumer<Throwable>() {
-                                @Override
-                                public void accept(Throwable e) {
-                                    e.printStackTrace();
-                                }
-                            });
-        } else if (getCamera(mCameraID)) { //were able to find a camera to use
-            startCameraPreview();
-        }
-    }
+        Preview preview = new Preview.Builder().build();
+        preview.setSurfaceProvider(vPreviewView.getSurfaceProvider());
 
-    //returns true if able to get camera and false if we werent able to
-    private boolean getCamera(int cameraID) {
+        mImageCapture = new ImageCapture.Builder()
+                .setResolutionSelector(new ResolutionSelector.Builder()
+                        .setResolutionStrategy(new ResolutionStrategy(MAX_PICTURE_SIZE,
+                                ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER))
+                        .build())
+                .build();
+
+        CameraSelector selector = new CameraSelector.Builder().requireLensFacing(mCameraID).build();
+
+        mCameraProvider.unbindAll();
         try {
-            mCamera = Camera.open(cameraID);
-            vPreviewView.setCamera(mCamera);
-            return true;
-        } catch (Exception e) {
-            Log.d(TAG, "Can't open camera with id " + cameraID);
-            e.printStackTrace();
-            return false;
+            mCamera = mCameraProvider.bindToLifecycle(getViewLifecycleOwner(), selector, preview, mImageCapture);
+        } catch (IllegalArgumentException e) {
+            Log.d(TAG, "Can't open camera with id " + mCameraID, e);
+            return;
         }
-    }
+        vPreviewView.setCamera(mCamera);
 
-
-    /**
-     * Start the camera preview
-     */
-    private void startCameraPreview() {
-        determineDisplayOrientation();
-        setupCamera();
-
-        try {
-            mCamera.setPreviewTexture(mSurfaceHolder);
-            mCamera.startPreview();
-            mIsSafeToTakePhoto = true;
-            setCameraFocusReady(true);
-        } catch (IOException e) {
-            Log.d(TAG, "Can't start camera preview due to IOException " + e);
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * Stop the camera preview
-     */
-    private void stopCameraPreview() {
-        mIsSafeToTakePhoto = false;
-        setCameraFocusReady(false);
-
-        // Nulls out callbacks, stops face detection
-        mCamera.stopPreview();
-        vPreviewView.setCamera(null);
-    }
-
-    private void setCameraFocusReady(final boolean isFocusReady) {
-        if (this.vPreviewView != null) {
-            vPreviewView.setIsFocusReady(isFocusReady);
-        }
-    }
-
-    private void determineDisplayOrientation() {
-        mCamera.setDisplayOrientation(90);
-    }
-
-    private boolean isFrontFacingCamera() {
-        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        Camera.getCameraInfo(mCameraID, cameraInfo);
-
-        return cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT;
-    }
-
-
-    /**
-     * Setup the camera parameters
-     */
-    private void setupCamera() {
-        // Never keep a global parameters
-        Camera.Parameters parameters = mCamera.getParameters();
-
-        Camera.Size bestPreviewSize = determineBestSize(mCamera.getParameters().getSupportedPreviewSizes());
-        parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
-
-        Camera.Size bestPictureSize = determineBestSize(mCamera.getParameters().getSupportedPictureSizes());
-        parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
-
-        List<String> focusmodes = parameters.getSupportedFocusModes();
-        // Set continuous picture focus, if it's supported
-        if (focusmodes != null && focusmodes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        }
-
-        List<String> flashModes = parameters.getSupportedFlashModes();
-        if (flashModes != null && flashModes.contains(Camera.Parameters.FLASH_MODE_ON)){
+        if (mCamera.getCameraInfo().hasFlashUnit()) {
             vFlashContainer.setVisibility(View.VISIBLE);
             setupFlashMode();
-
-            if (mFlashOn) parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
-        }else {
+        } else {
             vFlashContainer.setVisibility(View.INVISIBLE);
             mFlashOn = false;
         }
-
-        // Lock in the changes
-        mCamera.setParameters(parameters);
+        mImageCapture.setFlashMode(flashMode());
     }
 
-    private Camera.Size determineBestSize(List<Camera.Size> sizes) {
-
-        Camera.Size bestSize = null;
-
-        for (Camera.Size size : sizes) {
-            boolean isDesireRatio = (size.width / 4) == (size.height / 3) || (size.height / 4) == (size.width / 3);
-            boolean isBetterSize = (bestSize == null) || size.width > bestSize.width;
-
-            if (isDesireRatio && isBetterSize && size.height < 3000 && size.width < 3000) {
-                bestSize = size;
-            }
-        }
-
-        if (bestSize == null) {
-            Log.d(TAG, "cannot find the best camera size");
-            return sizes.get(sizes.size() - 1);
-        }
-
-        return bestSize;
+    private int flashMode() {
+        return mFlashOn ? ImageCapture.FLASH_MODE_ON : ImageCapture.FLASH_MODE_OFF;
     }
 
-    @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-        if (getActivity() == null) return;
+    private boolean isFrontFacingCamera() {
+        return mCameraID == CameraSelector.LENS_FACING_FRONT;
+    }
+
+    private void onPictureTaken(ImageProxy data) {
+        if (getActivity() == null) {
+            data.close();
+            return;
+        }
 
         mProcessImageSubscriptions =
                 Observable.just(Optional.ofNullable(ImageUtility.savePicture(getActivity(), rotateImage(data))))
@@ -486,37 +321,24 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
                         });
     }
 
-    private Bitmap rotateImage(byte[] data) {
-        Bitmap image = BitmapFactory.decodeByteArray(data, 0, data.length);
+    /**
+     * Turns the image upright, mirrors it if it's a selfie so it matches the preview, and keeps the
+     * top square, which is the part that was visible above the buttons.
+     */
+    private Bitmap rotateImage(ImageProxy data) {
+        Bitmap image = data.toBitmap();
         Matrix mat = new Matrix();
-        boolean front = isFrontFacingCamera();
+        mat.setRotate(data.getImageInfo().getRotationDegrees());
+        data.close();
 
-        if (front) {
-            mat.setScale(1, -1);
-            mat.postRotate(270);
-        } else {
-            mat.setRotate(90);
-        }
+        if (isFrontFacingCamera()) mat.postScale(-1, 1);
 
-        if (front) {
-            image = Bitmap.createBitmap(
-                    image,
-                    image.getWidth() - image.getHeight(),
-                    0,
-                    image.getHeight(),
-                    image.getHeight(),
-                    mat,
-                    true
-            );
-        } else {
-            image = Bitmap.createBitmap(image, 0, 0, image.getHeight(), image.getHeight(), mat, true);
-        }
-
-        return image;
+        image = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), mat, true);
+        int size = Math.min(image.getWidth(), image.getHeight());
+        return Bitmap.createBitmap(image, 0, 0, size, size);
     }
 
-    @Override
-    public void onShutter() {
+    private void playShutterSound() {
         if (getActivity() == null) return;
         AudioManager mgr = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
         mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
@@ -525,19 +347,10 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
 
     private boolean toggleFlash(){
 
-        if (mCamera == null) return false;
+        if (mImageCapture == null) return false;
 
-        Camera.Parameters parameters = mCamera.getParameters();
-        String flashmode = mFlashOn ? Camera.Parameters.FLASH_MODE_OFF : Camera.Parameters.FLASH_MODE_ON;
-
-        if (parameters.getSupportedFlashModes().contains(flashmode)){
-            mFlashOn = !mFlashOn;
-            parameters.setFlashMode(flashmode);
-            mCamera.setParameters(parameters);
-            return true;
-        }
-
-        return false;
+        mFlashOn = !mFlashOn;
+        mImageCapture.setFlashMode(flashMode());
+        return true;
     }
 }
-

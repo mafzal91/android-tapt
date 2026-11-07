@@ -16,7 +16,7 @@
     />
 
 
-    <com.linute.linute.ProfileCamera.SquareCameraPreview
+    <com.linute.linute.SquareCamera.CameraPreviewLayout
         android:id="@+id/camera_preview_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

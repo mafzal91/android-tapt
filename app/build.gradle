@@ -92,6 +92,12 @@ dependencies {
     implementation 'androidx.media3:media3-common:1.9.4'
     implementation 'androidx.media3:media3-exoplayer:1.9.4'
     implementation 'androidx.media3:media3-ui:1.9.4'
+    // 1.6 and later need compileSdk 36
+    implementation 'androidx.camera:camera-core:1.5.3'
+    implementation 'androidx.camera:camera-camera2:1.5.3'
+    implementation 'androidx.camera:camera-lifecycle:1.5.3'
+    implementation 'androidx.camera:camera-video:1.5.3'
+    implementation 'androidx.camera:camera-view:1.5.3'
 }
 
 // app/google-services.json is not committed (see SETUP.md). Without it the
