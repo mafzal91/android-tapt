@@ -31,7 +31,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.SessionExpiry;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
@@ -492,10 +492,10 @@ public class MainActivity extends BaseTaptActivity {
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
                 .dontAnimate()
-                .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000")))
+                .signature(new ObjectKey(sharedPreferences.getString("imageSigniture", "000")))
                 .override(size, size) //change image to the size we want
                 .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                 .into((CircleImageView) header.findViewById(R.id.navigation_header_profile_image));
     }
 

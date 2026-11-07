@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
@@ -269,14 +269,14 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
             //set profile image
             mRequestManager
+                    .asBitmap()
+
                     .load(update.isAnon() ? ((update.getAnonImage() == null || update.getAnonImage().equals(""))
                             ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(update.getAnonImage()))
                             : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
-
-                    .asBitmap()
                     .placeholder(R.drawable.image_loading_background)
-                    .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000"))) //so profile images update
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .signature(new ObjectKey(sharedPreferences.getString("imageSigniture", "000"))) //so profile images update
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(mProfileImage);
 
 
@@ -290,7 +290,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     mRequestManager
                             .load(R.drawable.quotation2)
                             .dontAnimate()
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                             .into(mEventPicture);
                 } else { //picture post
                     //set event image
@@ -298,7 +298,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             .load(update.getEventImageName())
                             .dontAnimate()
                             .placeholder(R.drawable.image_loading_background)
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                             .into(mEventPicture);
                 }
 

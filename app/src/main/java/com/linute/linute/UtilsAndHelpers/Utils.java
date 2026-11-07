@@ -11,7 +11,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.BuildConfig;
 import com.linute.linute.R;
 
@@ -309,11 +309,11 @@ public class Utils {
         }
     }
 
-    private static StringSignature mGlideSignature;
+    private static ObjectKey mGlideSignature;
 
-    public static StringSignature getGlideSignature(Context context) {
+    public static ObjectKey getGlideSignature(Context context) {
         if (mGlideSignature == null) {
-            mGlideSignature = new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
+            mGlideSignature = new ObjectKey(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
         }
         return mGlideSignature;
     }

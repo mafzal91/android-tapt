@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -111,14 +111,14 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private TextView mCollegeName;
         private ImageView mAddButton;
         private ImageView mProfileImage;
-        private StringSignature mStringSignature;
+        private ObjectKey mStringSignature;
 
         private FriendSearchUser mFriendSearchUser;
 
         public FriendSearchViewHolder(View itemView) {
             super(itemView);
 
-            mStringSignature = new StringSignature(mSharedPreferences.getString("imageSigniture", "000"));
+            mStringSignature = new ObjectKey(mSharedPreferences.getString("imageSigniture", "000"));
             mNameView = (TextView) itemView.findViewById(R.id.friendSearchItem_full_name);
             mProfileImage = (ImageView) itemView.findViewById(R.id.friendSearchItem_profile_image);
             mAddButton = (ImageView) itemView.findViewById(R.id.friendSearchItem_add_button);
@@ -139,7 +139,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     .dontAnimate()
                     .signature(mStringSignature) //so profile images update
                     .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(mProfileImage);
 
             mAddButton.setImageResource(mFriendSearchUser.isFollowing() ?

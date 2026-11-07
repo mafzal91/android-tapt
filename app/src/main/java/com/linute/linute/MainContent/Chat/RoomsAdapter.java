@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -119,12 +119,12 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         protected TextView vTimeStamp;
         protected ChatRoom mRoom;
         protected View vIsMuted;
-        private StringSignature mSignature;
+        private ObjectKey mSignature;
 
         public RoomsViewHolder(View itemView) {
             super(itemView);
 
-            mSignature = new StringSignature(mSharedPreferences.getString("imageSigniture", "000"));
+            mSignature = new ObjectKey(mSharedPreferences.getString("imageSigniture", "000"));
             vUserImage = (ImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);

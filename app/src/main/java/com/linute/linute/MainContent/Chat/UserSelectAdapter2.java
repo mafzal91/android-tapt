@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -32,14 +32,14 @@ public class UserSelectAdapter2 extends HeadedSelectableListAdapter {
     protected List<User> selectedUserList;
     protected List<User> lockedUserList;
     private final List<User> focusedUserList;
-    private final StringSignature mImageSign;
+    private final ObjectKey mImageSign;
     private OnUserClickListener onUserClickListener;
 
     public UserSelectAdapter2(Context aContext) {
         super();
         focusedUserList = new ArrayList<>(1);
         setList(FOCUSED_USERS_LIST_INDEX, focusedUserList);
-        mImageSign = new StringSignature(aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
+        mImageSign = new ObjectKey(aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000"));
     }
 
     @Override
@@ -171,7 +171,7 @@ public class UserSelectAdapter2 extends HeadedSelectableListAdapter {
                     .dontAnimate()
                     .signature(mImageSign)
                     .placeholder(R.color.seperator_color)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vUserImage);
 
 

@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
@@ -340,8 +339,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         vProfileImage.setVisibility(View.VISIBLE);
                         // Log.i("TEST", "bindModel: "+u.userImage);
                         mRequestManager
-                                .load(Utils.getImageUrlOfUser(u.userImage))
                                 .asBitmap()
+                                .load(Utils.getImageUrlOfUser(u.userImage))
                                 .placeholder(R.color.seperator_color)
                                 .into(vProfileImage);
 
@@ -468,8 +467,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             mRequestManager
-                    .load(url)
                     .asBitmap()
+                    .load(url)
                     .dontAnimate()
                     .placeholder(R.color.seperator_color)
                     .into((ImageView) vLikeBar.findViewById(R.id.post_profile));
@@ -481,8 +480,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private void setImage(String image) {
             vImage.setImageResource(android.R.color.transparent);
             mRequestManager
-                    .load(image)
                     .asBitmap()
+                    .load(image)
                     //.centerCrop()
                     .placeholder(R.color.seperator_color)
                     .into(vImage);
@@ -506,7 +505,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             //loads gif
             mRequestManager
                     .load(R.drawable.typing_three_dots_android)
-                    .into(new GlideDrawableImageViewTarget((ImageView) itemView.findViewById(R.id.gif)));
+                    .into((ImageView) itemView.findViewById(R.id.gif));
         }
     }
 }

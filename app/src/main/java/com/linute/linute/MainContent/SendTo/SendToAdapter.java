@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
@@ -37,7 +37,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private ButtonAction mButtonAction;
     private OnCollegeViewHolderTouched mOnCollegeViewHolderTouched;
 
-    private StringSignature mImageSignature;
+    private ObjectKey mImageSignature;
     //private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
     //private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
@@ -51,7 +51,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mCheckedItems.add(new HashSet<SendToItem>());
         mCheckedItems.add(new HashSet<SendToItem>());
 
-        mImageSignature = new StringSignature(
+        mImageSignature = new ObjectKey(
                 context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")
         );
     }
@@ -233,7 +233,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     .dontAnimate()
                     .signature(mImageSignature)
                     .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vImage);
         }
     }
@@ -249,7 +249,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             mRequestManager.load(Utils.getTrendsImageURL(item.getImage()))
                     .dontAnimate()
                     .placeholder(R.color.seperator_color)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                     .into(vImage);
         }
     }

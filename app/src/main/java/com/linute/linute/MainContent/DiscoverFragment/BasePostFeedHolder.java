@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
@@ -170,9 +170,9 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
         mRequestManager
                 .load(image)
                 .dontAnimate()
-                .signature(new StringSignature(mImageSignature))
+                .signature(new ObjectKey(mImageSignature))
                 .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                 .into(vUserImage);
     }
 
@@ -181,7 +181,7 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
                 .load(image)
                 .dontAnimate()
                 .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //only cache the scaled image
                 .into(vUserImage);
     }
 
