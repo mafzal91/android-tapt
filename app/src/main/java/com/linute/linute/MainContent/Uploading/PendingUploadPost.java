@@ -3,10 +3,12 @@ package com.linute.linute.MainContent.Uploading;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.work.Data;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by QiFeng on 6/25/16.
@@ -71,54 +73,59 @@ public class PendingUploadPost implements Parcelable {
 
 
     /**
-     * WorkManager keeps this until the upload has run. It holds at most 10KB, so a post with close
-     * to that much text won't fit.
+     * Saved to a file while the upload waits, because WorkManager's own storage holds at most 10KB
+     * and neither the text nor the list of people it's shared with has a limit.
      */
-    public Data toData() {
-        return new Data.Builder()
-                .putString("id", mId)
-                .putString("collegeId", mCollegeId)
-                .putInt("privacy", mPrivacy)
-                .putInt("isAnonymousCommentsDisabled", mIsAnonymousCommentsDisabled)
-                .putString("title", mTitle)
-                .putInt("type", mType)
-                .putString("imagePath", mImagePath)
-                .putString("videoPath", mVideoPath)
-                .putString("owner", mOwner)
-                .putString("userToken", mUserToken)
-                .putString("trendId", mTrendId)
-                .putStringArray("stickers", toArray(mStickers))
-                .putStringArray("filters", toArray(mFilters))
-                .putStringArray("people", toArray(mPeople))
-                .putStringArray("trends", toArray(mTrends))
-                .build();
+    public String toJson() throws JSONException {
+        return new JSONObject()
+                .put("id", mId)
+                .put("collegeId", mCollegeId)
+                .put("privacy", mPrivacy)
+                .put("isAnonymousCommentsDisabled", mIsAnonymousCommentsDisabled)
+                .put("title", mTitle)
+                .put("type", mType)
+                .put("imagePath", mImagePath)
+                .put("videoPath", mVideoPath)
+                .put("owner", mOwner)
+                .put("userToken", mUserToken)
+                .put("trendId", mTrendId)
+                .put("stickers", toArray(mStickers))
+                .put("filters", toArray(mFilters))
+                .put("people", toArray(mPeople))
+                .put("trends", toArray(mTrends))
+                .toString();
     }
 
-    public static PendingUploadPost fromData(Data data) {
+    public static PendingUploadPost fromJson(String json) throws JSONException {
+        JSONObject data = new JSONObject(json);
         PendingUploadPost post = new PendingUploadPost(
-                data.getString("id"),
-                data.getString("collegeId"),
-                data.getInt("privacy", 0),
-                data.getInt("isAnonymousCommentsDisabled", 0),
-                data.getString("title"),
-                data.getInt("type", 0),
-                data.getString("imagePath"),
-                data.getString("videoPath"),
-                toList(data.getStringArray("stickers")),
-                toList(data.getStringArray("filters")),
-                data.getString("owner"),
-                data.getString("userToken"),
-                data.getString("trendId"));
-        post.setShareParams(toList(data.getStringArray("people")), toList(data.getStringArray("trends")));
+                data.optString("id", null),
+                data.optString("collegeId", null),
+                data.optInt("privacy", 0),
+                data.optInt("isAnonymousCommentsDisabled", 0),
+                data.optString("title", null),
+                data.optInt("type", 0),
+                data.optString("imagePath", null),
+                data.optString("videoPath", null),
+                toList(data.optJSONArray("stickers")),
+                toList(data.optJSONArray("filters")),
+                data.optString("owner", null),
+                data.optString("userToken", null),
+                data.optString("trendId", null));
+        post.setShareParams(toList(data.optJSONArray("people")), toList(data.optJSONArray("trends")));
         return post;
     }
 
-    private static String[] toArray(ArrayList<String> list) {
-        return list == null ? new String[0] : list.toArray(new String[0]);
+    private static JSONArray toArray(ArrayList<String> list) {
+        return list == null ? new JSONArray() : new JSONArray(list);
     }
 
-    private static ArrayList<String> toList(String[] array) {
-        return new ArrayList<>(Arrays.asList(array));
+    private static ArrayList<String> toList(JSONArray array) throws JSONException {
+        ArrayList<String> list = new ArrayList<>();
+        if (array != null) {
+            for (int i = 0; i < array.length(); i++) list.add(array.getString(i));
+        }
+        return list;
     }
 
 

@@ -16,6 +16,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.work.Constraints;
+import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.ForegroundInfo;
 import androidx.work.NetworkType;
@@ -37,8 +38,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
@@ -52,6 +57,9 @@ public class UploadWorker extends Worker {
     public static final String TAG = UploadWorker.class.getSimpleName();
 
     static final String UNIQUE_WORK = "uploads";
+
+    // the file the post waits in
+    private static final String KEY_POST = "post";
 
     private static final String CHANNEL_ID = "uploads";
 
@@ -70,8 +78,17 @@ public class UploadWorker extends Worker {
      * in memory, so running them together could run out.
      */
     public static void enqueue(Context context, PendingUploadPost post) {
+        File saved;
+        try {
+            saved = save(context, post);
+        } catch (IOException | JSONException e) {
+            // Only when storage is full or failing
+            Log.w(TAG, "enqueue: can't save the post", e);
+            return;
+        }
+
         OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(UploadWorker.class)
-                .setInputData(post.toData())
+                .setInputData(new Data.Builder().putString(KEY_POST, saved.getPath()).build())
                 .setConstraints(new Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
                         .build())
@@ -79,6 +96,26 @@ public class UploadWorker extends Worker {
                 .build();
         WorkManager.getInstance(context)
                 .enqueueUniqueWork(UNIQUE_WORK, ExistingWorkPolicy.APPEND_OR_REPLACE, request);
+    }
+
+    /** Kept in files, not the cache, which Android can clear while the upload waits for a network. */
+    private static File save(Context context, PendingUploadPost post) throws IOException, JSONException {
+        File dir = new File(context.getFilesDir(), "uploads");
+        if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("Can't create " + dir);
+
+        File file = File.createTempFile("post", ".json", dir);
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(post.toJson().getBytes(StandardCharsets.UTF_8));
+        }
+        return file;
+    }
+
+    private static String read(File file) throws IOException {
+        byte[] bytes = new byte[(int) file.length()];
+        try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
+            in.readFully(bytes);
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public UploadWorker(@NonNull Context context, @NonNull WorkerParameters params) {
@@ -105,7 +142,16 @@ public class UploadWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        PendingUploadPost p = PendingUploadPost.fromData(getInputData());
+        File saved = new File(getInputData().getString(KEY_POST));
+        PendingUploadPost p;
+        try {
+            p = PendingUploadPost.fromJson(read(saved));
+        } catch (IOException | JSONException e) {
+            // Nothing left to upload, or to offer a retry for
+            Log.w(TAG, "doWork: can't read the saved post", e);
+            saved.delete();
+            return Result.success();
+        }
 
         boolean posted;
         try {
@@ -122,6 +168,9 @@ public class UploadWorker extends Worker {
         if (!posted && isStopped()) {
             return Result.retry();
         }
+
+        // Retrying from the notification saves the post again
+        saved.delete();
 
         mNotificationManager.cancel(PROGRESS_ID);
         if (posted) {
