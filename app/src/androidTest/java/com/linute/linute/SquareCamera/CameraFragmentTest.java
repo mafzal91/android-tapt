@@ -152,10 +152,6 @@ public class CameraFragmentTest {
             long duration = duration(recorded);
             recorded.release();
             assertTrue("Lasted " + duration, duration > 14000 && duration < 15500);
-
-            // Closing the camera deletes the video, and the edit screen's overlay thread crashes if it
-            // is still reading it. That race is older than CameraX; wait it out rather than hit it.
-            Thread.sleep(3000);
         }
     }
 
