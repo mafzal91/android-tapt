@@ -3,7 +3,10 @@ package com.linute.linute.MainContent.Uploading;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.work.Data;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by QiFeng on 6/25/16.
@@ -65,6 +68,58 @@ public class PendingUploadPost implements Parcelable {
         mTrendId = trendId;
     }
 
+
+
+    /**
+     * WorkManager keeps this until the upload has run. It holds at most 10KB, so a post with close
+     * to that much text won't fit.
+     */
+    public Data toData() {
+        return new Data.Builder()
+                .putString("id", mId)
+                .putString("collegeId", mCollegeId)
+                .putInt("privacy", mPrivacy)
+                .putInt("isAnonymousCommentsDisabled", mIsAnonymousCommentsDisabled)
+                .putString("title", mTitle)
+                .putInt("type", mType)
+                .putString("imagePath", mImagePath)
+                .putString("videoPath", mVideoPath)
+                .putString("owner", mOwner)
+                .putString("userToken", mUserToken)
+                .putString("trendId", mTrendId)
+                .putStringArray("stickers", toArray(mStickers))
+                .putStringArray("filters", toArray(mFilters))
+                .putStringArray("people", toArray(mPeople))
+                .putStringArray("trends", toArray(mTrends))
+                .build();
+    }
+
+    public static PendingUploadPost fromData(Data data) {
+        PendingUploadPost post = new PendingUploadPost(
+                data.getString("id"),
+                data.getString("collegeId"),
+                data.getInt("privacy", 0),
+                data.getInt("isAnonymousCommentsDisabled", 0),
+                data.getString("title"),
+                data.getInt("type", 0),
+                data.getString("imagePath"),
+                data.getString("videoPath"),
+                toList(data.getStringArray("stickers")),
+                toList(data.getStringArray("filters")),
+                data.getString("owner"),
+                data.getString("userToken"),
+                data.getString("trendId"));
+        post.setShareParams(toList(data.getStringArray("people")), toList(data.getStringArray("trends")));
+        return post;
+    }
+
+    private static String[] toArray(ArrayList<String> list) {
+        return list == null ? new String[0] : list.toArray(new String[0]);
+    }
+
+    private static ArrayList<String> toList(String[] array) {
+        return new ArrayList<>(Arrays.asList(array));
+    }
 
 
     public void setCollege(String collegeId){
