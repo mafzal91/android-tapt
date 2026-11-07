@@ -104,6 +104,12 @@ port 80 and routes by host name, so requests must arrive as `api.gettapt`.
 `pnpm smoke` in the backend creates users at Smoke Test University with the
 password `pass1234`, which is the quickest way to get an account to log in with.
 
+## CI
+
+`.github/workflows/build.yml` compiles the app and its device tests on every
+pull request and on pushes to `merged`. It doesn't run the device tests, because
+they need an emulator. Run those before merging.
+
 ## Known gaps
 
 - **Large uploads run out of memory.** A post is sent as one JSON string with
