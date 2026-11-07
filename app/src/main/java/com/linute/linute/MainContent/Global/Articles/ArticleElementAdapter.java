@@ -20,9 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.PlayerView;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -251,7 +251,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private static class VideoElementVH extends ElementVH implements View.OnClickListener {
 
         private final ImageView vPreview;
-        private final StyledPlayerView vVideo;
+        private final PlayerView vVideo;
 //        private final ImageView vPause;
 
 //        private final WebView vHTML5;
@@ -259,7 +259,7 @@ public class ArticleElementAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         VideoElementVH(View itemView) {
             super(itemView);
             vPreview = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-            vVideo = (StyledPlayerView) itemView.findViewById(R.id.exo_player);
+            vVideo = (PlayerView) itemView.findViewById(R.id.exo_player);
             ExoPlayer player = new ExoPlayer.Builder(itemView.getContext()).build();
 
 
