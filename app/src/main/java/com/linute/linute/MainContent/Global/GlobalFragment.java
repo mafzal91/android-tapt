@@ -42,10 +42,10 @@ import java.util.LinkedList;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by QiFeng on 5/14/16.
@@ -229,11 +229,11 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         vAppBarLayout.setExpanded(true, false);
 
         if (mChatSubscription != null) {
-            mChatSubscription.unsubscribe();
+            mChatSubscription.dispose();
         }
 
         if (mNotificationSubscription != null) {
-            mNotificationSubscription.unsubscribe();
+            mNotificationSubscription.dispose();
         }
     }
 
@@ -372,10 +372,10 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     }
 
 
-    private Subscription mChatSubscription;
-    private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
+    private Disposable mChatSubscription;
+    private Consumer<NewMessageEvent> mNewMessageSubscriber = new Consumer<NewMessageEvent>() {
         @Override
-        public void call(NewMessageEvent event) {
+        public void accept(NewMessageEvent event) {
             int count = NotificationsCounterSingleton.getInstance().getNumMessages();
             vNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
             vNotificationCounter.setText(count < 100 ? count + "" : "+");
@@ -383,10 +383,10 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     };
 
 
-    private Subscription mNotificationSubscription;
-    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+    private Disposable mNotificationSubscription;
+    private Consumer<NotificationEvent> mNotificationEventAction1 = new Consumer<NotificationEvent>() {
         @Override
-        public void call(NotificationEvent notificationEvent) {
+        public void accept(NotificationEvent notificationEvent) {
             if (notificationEvent.getType() == NotificationEvent.DISCOVER) {
                 vToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
             } else if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {

@@ -1,7 +1,7 @@
 package com.linute.linute.MainContent.EventBuses;
 
-import rx.Observable;
-import rx.subjects.PublishSubject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 
 /**
  * Created by QiFeng on 5/7/16.

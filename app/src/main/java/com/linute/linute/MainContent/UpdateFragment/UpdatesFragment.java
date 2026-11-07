@@ -39,10 +39,10 @@ import java.util.ArrayList;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by QiFeng on 1/6/16.
@@ -281,7 +281,7 @@ public class UpdatesFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
         if (mChatSubscription != null) {
-            mChatSubscription.unsubscribe();
+            mChatSubscription.dispose();
         }
 
         mAppBarLayout.setExpanded(true, false);
@@ -598,10 +598,10 @@ public class UpdatesFragment extends BaseFragment {
         mUpdatesRecyclerView.scrollToPosition(0);
     }
 
-    private Subscription mChatSubscription;
-    private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
+    private Disposable mChatSubscription;
+    private Consumer<NewMessageEvent> mNewMessageSubscriber = new Consumer<NewMessageEvent>() {
         @Override
-        public void call(NewMessageEvent event) {
+        public void accept(NewMessageEvent event) {
             int count = NotificationsCounterSingleton.getInstance().getNumMessages();
             mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
             vNotificationCounter.setText(count < 100 ? count + "" : "+");

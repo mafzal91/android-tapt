@@ -51,10 +51,10 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -71,7 +71,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     private static RoomsActivityFragment instance;
     private View vUpdateIndicator;
     private TextView vUpdateCounter;
-    private Subscription mNotificationSubscription;
+    private Disposable mNotificationSubscription;
 
     public static RoomsActivityFragment getInstance(){
         if(instance == null){
@@ -260,11 +260,11 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     public void onPause() {
         super.onPause();
         //stop listening
-        if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()) {
-            mChatSubscription.unsubscribe();
+        if (mChatSubscription != null && !mChatSubscription.isDisposed()) {
+            mChatSubscription.dispose();
         }
         if(mNotificationSubscription != null){
-            mNotificationSubscription.unsubscribe();
+            mNotificationSubscription.dispose();
         }
     }
 
@@ -770,12 +770,12 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         });
     }
 
-    private Subscription mChatSubscription;
+    private Disposable mChatSubscription;
 
-    private Action1<NewMessageEvent>
-            mNewMessageSubscriber = new Action1<NewMessageEvent>() {
+    private Consumer<NewMessageEvent>
+            mNewMessageSubscriber = new Consumer<NewMessageEvent>() {
         @Override
-        public void call(NewMessageEvent event) {
+        public void accept(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
                 final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), 0, "", "", null, event.getMessage(), true, new Date().getTime(), false, 0);
                 getActivity().runOnUiThread(new Runnable() {
@@ -861,9 +861,9 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         }
     }
 
-    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+    private Consumer<NotificationEvent> mNotificationEventAction1 = new Consumer<NotificationEvent>() {
         @Override
-        public void call(NotificationEvent notificationEvent) {
+        public void accept(NotificationEvent notificationEvent) {
             if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
                 int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
                 vUpdateIndicator.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
