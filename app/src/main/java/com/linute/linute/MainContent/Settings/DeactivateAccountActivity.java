@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
@@ -25,7 +24,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import io.realm.Realm;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -125,20 +123,14 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
                 TaptSocket.getInstance().forceDisconnect();
                 TaptSocket.clear();
 
-                Realm.getDefaultInstance().executeTransactionAsync(new Realm.Transaction() {
+                activity.runOnUiThread(new Runnable() {
                     @Override
-                    public void execute(Realm realm) {
-                        realm.delete(TaptUser.class);
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Intent i = new Intent(activity, PreLoginActivity.class);
-                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
-                                startActivity(i);
-                                activity.finish();
-                                Toast.makeText(activity, "Your account has been deactivated", Toast.LENGTH_LONG).show();
-                            }
-                        });
+                    public void run() {
+                        Intent i = new Intent(activity, PreLoginActivity.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
+                        startActivity(i);
+                        activity.finish();
+                        Toast.makeText(activity, "Your account has been deactivated", Toast.LENGTH_LONG).show();
                     }
                 });
 
