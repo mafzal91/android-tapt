@@ -186,13 +186,6 @@ public class LSDKUser {
         return API_Methods.post("users/confirm-pincode", API_Methods.getMainHeader(mToken), params, callback);
     }
 
-    public Call checkPincode(String token, String email, String pin, Callback callback){
-        Map<String, Object> params = new HashMap<>();
-        params.put("email", email);
-        params.put("pinCode", pin);
-        return API_Methods.post("users/confirm-pincode", API_Methods.getMainHeader(token), params, callback);
-    }
-
     public Call checkPhonePincode(String phone, String pin, Callback callback){
         Map<String, Object> params = new HashMap<>();
         params.put("phone", phone);
@@ -213,6 +206,18 @@ public class LSDKUser {
         params.put("email",email);
 
         return API_Methods.post("users/reset-password-email", header, params, callback);
+    }
+
+    //sets a new password with the pin code that resetPassword(email) sent
+    public Call resetPassword(String email, String pinCode, String password, Callback callback){
+        Map<String, String> header = new HashMap<>();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("email", email);
+        params.put("pinCode", pinCode);
+        params.put("password", password);
+
+        return API_Methods.post("users/reset-password", header, params, callback);
     }
 
 
