@@ -339,7 +339,6 @@ public class ChangeEmailActivity extends BaseSocketActivity {
     }
 
 
-    //TODO: ADD ERROR FOR NON EDU EMAIL
     private boolean isEmailValid(String email) {
         if (TextUtils.isEmpty(email)) {
             mEmailText.setError(getString(R.string.error_field_required));
@@ -348,7 +347,7 @@ public class ChangeEmailActivity extends BaseSocketActivity {
         }
 
         if (!Utils.VALID_EMAIL_ADDRESS_REGEX.matcher(email).matches()) {
-            mEmailText.setError("Invalid edu email");
+            mEmailText.setError(getString(R.string.error_invalid_email));
             mEmailText.requestFocus();
             return false;
         }

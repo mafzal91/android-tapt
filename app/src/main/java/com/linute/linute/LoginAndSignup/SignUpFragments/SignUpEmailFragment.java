@@ -109,7 +109,7 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                 String email = vEmail.getText().toString().trim().toLowerCase();
 
                 if (!Utils.VALID_EMAIL_ADDRESS_REGEX.matcher(email).matches()) {
-                    vEmail.setError("Invalid edu email");
+                    vEmail.setError(getString(R.string.error_invalid_email));
                     vEmail.requestFocus();
                     return;
                 }
