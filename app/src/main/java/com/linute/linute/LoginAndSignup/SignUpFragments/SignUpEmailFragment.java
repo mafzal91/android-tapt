@@ -265,13 +265,14 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                             });
                         }
                     } else {
-                        Log.e(TAG, "onResponse: " + response.body().string());
+                        final String body = response.body().string();
+                        Log.e(TAG, "onResponse: " + body);
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     showProgress(false);
-                                    Utils.showServerErrorToast(getContext());
+                                    Utils.showServerErrorToast(getContext(), body);
                                 }
                             });
                         }

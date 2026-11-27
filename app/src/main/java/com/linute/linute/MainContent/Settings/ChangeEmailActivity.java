@@ -156,13 +156,16 @@ public class ChangeEmailActivity extends BaseSocketActivity {
                 if (response.isSuccessful()) {//unique email
                     response.body().close();
                     getPinCode(email);
-                } else {//not unique
-                    Log.v(TAG, response.body().string());
+                } else {
+                    final boolean taken = response.code() == 404;
+                    final String body = response.body().string();
+                    Log.v(TAG, body);
                     runOnUiThread(new Runnable() { //show error
                         @Override
                         public void run() {
                             showProgress(false);
-                            emailAlreadyTaken();
+                            if (taken) emailAlreadyTaken();
+                            else Utils.showServerErrorToast(ChangeEmailActivity.this, body);
                         }
                     });
                 }
