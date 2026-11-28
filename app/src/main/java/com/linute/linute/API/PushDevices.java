@@ -79,7 +79,7 @@ public final class PushDevices {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                if (!response.isSuccessful()) Log.w(TAG, "DELETE devices: " + response.code());
+                Log.i(TAG, "DELETE devices: " + response.code());
                 response.close();
             }
         });

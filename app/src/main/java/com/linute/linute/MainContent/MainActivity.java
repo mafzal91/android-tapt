@@ -698,6 +698,8 @@ public class MainActivity extends BaseTaptActivity {
             // Transport failures carry an exception instead and are retried
             // silently, as before.
             if (args.length > 0 && args[0] instanceof JSONObject) {
+                // {message, data: {code}}: no credentials in it
+                Log.w(TAG, "socket refused: " + args[0]);
                 if (SessionExpiry.isSocketAuthError(args[0])) {
                     SessionExpiry.expire();
                 } else {
