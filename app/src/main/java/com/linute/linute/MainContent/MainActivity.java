@@ -127,6 +127,7 @@ public class MainActivity extends BaseTaptActivity {
         API_Methods.USER_ID = mSharedPreferences.getString("userID", null);
 
         TaptSocket.initSocketConnection(this);
+        PushDevices.refreshIfStale(this);
         PollsSingleton.init();
 
         EmptyProfileHolder.activity = this;

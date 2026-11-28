@@ -1,6 +1,7 @@
 package com.linute.linute.API;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -86,6 +87,57 @@ public class PushDevicesTest {
         assertEquals("push-token", body.getString("deviceToken"));
         assertEquals(DeviceInfoSingleton.getInstance(mContext).getUdid(), body.getString("udid"));
         assertEquals("android", body.getString("platform"));
+        long sent = prefs().getLong(PushDevices.LAST_SENT, 0);
+        assertTrue(System.currentTimeMillis() - sent < 60000);
+    }
+
+    @Test
+    public void refreshesAtMostOnceADay() throws Exception {
+        logIn("session-token", "push-token");
+
+        PushDevices.refreshIfStale(mContext);
+        WorkInfo first = waitForRun();
+        assertEquals(WorkInfo.State.SUCCEEDED, first.getState());
+        assertEquals(1, mRequests.size());
+
+        PushDevices.refreshIfStale(mContext);
+
+        // REPLACE would have queued a new job
+        assertEquals(first.getId(), WorkManager.getInstance(mContext)
+                .getWorkInfosForUniqueWork(PushDevices.REGISTER_WORK).get().get(0).getId());
+        assertEquals(1, mRequests.size());
+    }
+
+    @Test
+    public void refreshesAgainAfterADay() throws Exception {
+        logIn("session-token", "push-token");
+        prefs().edit().putLong(PushDevices.LAST_SENT,
+                System.currentTimeMillis() - PushDevices.REFRESH_INTERVAL - 1000).commit();
+
+        PushDevices.refreshIfStale(mContext);
+
+        assertEquals(WorkInfo.State.SUCCEEDED, waitForRun().getState());
+        assertEquals(1, mRequests.size());
+    }
+
+    @Test
+    public void doesNotRefreshWhenLoggedOut() throws Exception {
+        prefs().edit().clear().putString(QuickstartPreferences.OUR_TOKEN, "push-token").commit();
+
+        PushDevices.refreshIfStale(mContext);
+
+        assertTrue(WorkManager.getInstance(mContext)
+                .getWorkInfosForUniqueWork(PushDevices.REGISTER_WORK).get().isEmpty());
+    }
+
+    @Test
+    public void logOutForgetsTheLastRefreshSoTheNextLoginSends() throws Exception {
+        logIn("session-token", "push-token");
+        prefs().edit().putLong(PushDevices.LAST_SENT, System.currentTimeMillis()).commit();
+
+        PushDevices.unregister(mContext);
+
+        assertFalse(prefs().contains(PushDevices.LAST_SENT));
     }
 
     @Test
