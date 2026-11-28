@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.os.Build;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -16,6 +17,8 @@ import com.linute.linute.BuildConfig;
 import com.linute.linute.R;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,7 +37,7 @@ import java.util.regex.Pattern;
 public class Utils {
 
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
-            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.edu", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$", Pattern.CASE_INSENSITIVE);
 
     public static String CONTENT_TYPE = "application/json";
 
@@ -107,6 +110,19 @@ public class Utils {
     public static void showServerErrorToast(Context context) {
         if (context == null) return;
         Toast.makeText(context, R.string.error_communicating_server, Toast.LENGTH_SHORT).show();
+    }
+
+    //shows the "error" message in a server response, or the generic one if there isn't one
+    public static void showServerErrorToast(Context context, String responseBody) {
+        if (context == null) return;
+        String message = null;
+        try {
+            message = new JSONObject(responseBody).optString("error", null);
+        } catch (JSONException | NullPointerException ignored) {
+        }
+
+        if (TextUtils.isEmpty(message)) showServerErrorToast(context);
+        else Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     public static void showSavedToast(Context context) {

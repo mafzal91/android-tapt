@@ -109,7 +109,7 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                 String email = vEmail.getText().toString().trim().toLowerCase();
 
                 if (!Utils.VALID_EMAIL_ADDRESS_REGEX.matcher(email).matches()) {
-                    vEmail.setError("Invalid edu email");
+                    vEmail.setError(getString(R.string.error_invalid_email));
                     vEmail.requestFocus();
                     return;
                 }
@@ -265,13 +265,14 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                             });
                         }
                     } else {
-                        Log.e(TAG, "onResponse: " + response.body().string());
+                        final String body = response.body().string();
+                        Log.e(TAG, "onResponse: " + body);
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     showProgress(false);
-                                    Utils.showServerErrorToast(getContext());
+                                    Utils.showServerErrorToast(getContext(), body);
                                 }
                             });
                         }
@@ -318,12 +319,13 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                         } else
 
                         {
-                            Log.e(TAG, "onResponse: " + response.body().string());
+                            final String body = response.body().string();
+                            Log.e(TAG, "onResponse: " + body);
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Utils.showServerErrorToast(getContext());
+                                        Utils.showServerErrorToast(getContext(), body);
                                         showProgress(false);
                                     }
                                 });

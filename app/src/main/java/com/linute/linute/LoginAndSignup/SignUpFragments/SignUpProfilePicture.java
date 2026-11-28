@@ -220,13 +220,14 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
 
 
                 } else {
-                    Log.e(TAG, "onResponse: " + response.body().string());
+                    final String body = response.body().string();
+                    Log.e(TAG, "onResponse: " + body);
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 dialog.dismiss();
-                                Utils.showServerErrorToast(getActivity());
+                                Utils.showServerErrorToast(getActivity(), body);
                             }
                         });
                     }

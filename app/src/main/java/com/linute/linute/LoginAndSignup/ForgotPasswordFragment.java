@@ -24,9 +24,6 @@ import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 
 import okhttp3.Call;
@@ -65,9 +62,6 @@ public class ForgotPasswordFragment extends Fragment {
 
     private TextView mEmailConfirmTextView;
 
-    private String mUserID;
-
-    private String mUserToken;
     private Toolbar mToolbar;
 
     public ForgotPasswordFragment() {
@@ -128,8 +122,6 @@ public class ForgotPasswordFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putString("mSavedEmail", mEmailString);
         outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);
-        outState.putString("mUserID", mUserID);
-        outState.putString("userToken", mUserToken);
         super.onSaveInstanceState(outState);
     }
 
@@ -139,8 +131,6 @@ public class ForgotPasswordFragment extends Fragment {
         if (savedInstanceState != null) {
             mCurrentViewFlipperIndex = savedInstanceState.getInt("mCurrentFlipperIndex");
             mEmailString = savedInstanceState.getString("mSavedEmail");
-            mUserID = savedInstanceState.getString("mUserID");
-            mUserToken = savedInstanceState.getString("userToken");
             if (mEmailString != null) {
                 mEmailView.setText(mEmailString);
                 mEmailConfirmTextView.setText(mEmailString);
@@ -221,7 +211,7 @@ public class ForgotPasswordFragment extends Fragment {
         mPinCodeView.setError(null);
         if (getContext() != null) {
             showProgress(true, 1);
-            new LSDKUser(getContext()).checkPincode(mUserToken, mEmailString, mPinCodeView.getText().toString(), new Callback() {
+            new LSDKUser(getContext()).checkPincode(mEmailString, mPinCodeView.getText().toString(), new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     if (getActivity() != null){
@@ -342,34 +332,16 @@ public class ForgotPasswordFragment extends Fragment {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()) {
-                        try {
-                            JSONObject jsonObject = new JSONObject(response.body().string());
-
-                            JSONObject user = jsonObject.getJSONObject("user");
-                            mUserID = user.getString("id");
-                            mUserToken = user.getString("token");
-
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mViewFlipper.showNext();
-                                        mCurrentViewFlipperIndex++;
-                                        showProgress(false, 0);
-                                    }
-                                });
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showProgress(false, 0);
-                                        Utils.showServerErrorToast(getActivity());
-                                    }
-                                });
-                            }
+                        response.body().close();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mViewFlipper.showNext();
+                                    mCurrentViewFlipperIndex++;
+                                    showProgress(false, 0);
+                                }
+                            });
                         }
                     } else {
                         Log.i(TAG, "onResponse: "+response.body().string());
@@ -437,7 +409,7 @@ public class ForgotPasswordFragment extends Fragment {
             if (getActivity() == null) return;
 
             showProgress(true, 2);
-            new LSDKUser(getActivity()).changePassword(mUserToken, mUserID, password, new Callback() {
+            new LSDKUser(getActivity()).resetPassword(mEmailString, mPinCodeView.getText().toString(), password, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     if (getActivity() != null){

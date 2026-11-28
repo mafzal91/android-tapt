@@ -8,12 +8,12 @@
     <string name="title_activity_linute_login">Sign in</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Edu Email</string>
+    <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_sign_up_short">Sign up</string>
-    <string name="error_invalid_email">Invalid edu email</string>
+    <string name="error_invalid_email">Invalid email</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_nonmatching_passwords">This password is incorrect</string>
@@ -965,7 +965,7 @@ limitations under the License.\n\n
     <string name="deactivata_account_text">
         Deactivating your Tapt account will disable your profile and remove your data from being
         searched anywhere, including your posts on the campus feed. To reactivate your account,
-        simply log in with your .edu email and password.
+        simply log in with your email and password.
     </string>
     <string name="deactivate_perm_text">
         To delete your account completely, to the point where you won\'t be able to access it

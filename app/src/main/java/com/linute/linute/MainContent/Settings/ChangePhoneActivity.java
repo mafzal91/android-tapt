@@ -220,21 +220,15 @@ public class ChangePhoneActivity extends BaseSocketActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    try {
-                        String code = new JSONObject(response.body().string()).getString("pinCode");
-                        persistTempData(phone);//save information
-                        //Log.d(TAG, "onResponse: "+code);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() { //show next view
-                                showProgress(false, mGetConfirmation, mProgressBar1, mPhoneNumber);
-                                mViewSwitcher.showNext();
-                            }
-                        });
-                    } catch (JSONException e) {//weird response, show error
-                        e.printStackTrace();
-                        showServerErrorToast(mGetConfirmation, mProgressBar1, mPhoneNumber);
-                    }
+                    response.body().close();
+                    persistTempData(phone);//save information
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() { //show next view
+                            showProgress(false, mGetConfirmation, mProgressBar1, mPhoneNumber);
+                            mViewSwitcher.showNext();
+                        }
+                    });
                 } else {
                     Log.e(TAG, response.body().string());
                     showServerErrorToast(mGetConfirmation, mProgressBar1, mPhoneNumber);
