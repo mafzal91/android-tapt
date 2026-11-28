@@ -48,7 +48,6 @@ import com.linute.linute.MainContent.Chat.ChatRoom;
 import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -82,14 +81,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String token) {
         Log.d(TAG, "onNewToken");
-        getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
-                .edit().putString(QuickstartPreferences.OUR_TOKEN, token).apply();
-        DeviceInfoSingleton.getInstance(this).setDeviceToken(token);
-
-        TaptSocket socket = TaptSocket.getInstance();
-        if (socket != null) {
-            socket.updateDeviceToken(token);
-        }
+        PushDevices.saveToken(this, token);
         PushDevices.register(this);
     }
 

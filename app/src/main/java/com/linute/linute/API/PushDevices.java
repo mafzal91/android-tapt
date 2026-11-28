@@ -14,6 +14,9 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import org.json.JSONObject;
@@ -21,6 +24,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -41,6 +45,11 @@ public final class PushDevices {
 
     static final String REGISTER_WORK = "register-push-device";
 
+    // when PUT /devices last succeeded. The server drops devices it hasn't
+    // heard from in a while, so a logged-in phone repeats it once a day.
+    static final String LAST_SENT = "pushDeviceSentAt";
+    static final long REFRESH_INTERVAL = TimeUnit.HOURS.toMillis(24);
+
     private PushDevices() {
     }
 
@@ -59,16 +68,63 @@ public final class PushDevices {
     }
 
     /**
+     * Sends the current push token again if it hasn't been sent in the last
+     * day. Call it whenever the main screen opens, which covers app start and
+     * login.
+     */
+    public static void refreshIfStale(Context context) {
+        final Context appContext = context.getApplicationContext();
+        SharedPreferences prefs = appContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        if (!prefs.getBoolean("isLoggedIn", false)) return;
+        if (System.currentTimeMillis() - prefs.getLong(LAST_SENT, 0) < REFRESH_INTERVAL) return;
+
+        if (!isFirebaseConfigured(appContext)) {
+            // nothing new to fetch; the job does nothing without a saved token
+            register(appContext);
+            return;
+        }
+        // after a log out deleted the old token, this makes a new one
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) saveToken(appContext, task.getResult());
+            register(appContext);
+        });
+    }
+
+    /** Keeps a new push token for the next PUT /devices and the next socket handshake. */
+    public static void saveToken(Context context, String token) {
+        context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
+                .edit().putString(QuickstartPreferences.OUR_TOKEN, token).apply();
+        DeviceInfoSingleton.getInstance(context).setDeviceToken(token);
+        TaptSocket socket = TaptSocket.getInstance();
+        if (socket != null) socket.updateDeviceToken(token);
+    }
+
+    // Built without google-services.json there is no Firebase, and its calls would throw.
+    private static boolean isFirebaseConfigured(Context context) {
+        return !FirebaseApp.getApps(context).isEmpty();
+    }
+
+    /**
      * Removes this phone's push token from the account with DELETE /devices.
      * Call it before clearing the login, which the request needs. It doesn't
      * wait for the answer. If the request fails, the server drops the token
-     * when anyone next logs in on this phone.
+     * when anyone next logs in on this phone. Then the push token itself is
+     * deleted, so it stops working even if the request never arrived, and the
+     * next login sends a new one.
      */
     public static void unregister(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         String token = prefs.getString("userToken", null);
-        if (TextUtils.isEmpty(token)) return;
+        if (!TextUtils.isEmpty(token)) delete(context, token);
 
+        prefs.edit().remove(LAST_SENT).apply();
+        if (isFirebaseConfigured(context)) {
+            FirebaseMessaging.getInstance().deleteToken();
+            saveToken(context, "");
+        }
+    }
+
+    private static void delete(Context context, String token) {
         Map<String, Object> body = new HashMap<>();
         body.put("udid", DeviceInfoSingleton.getInstance(context).getUdid());
         API_Methods.delete("devices", API_Methods.getMainHeader(token), body, new Callback() {
@@ -117,7 +173,10 @@ public final class PushDevices {
                     .build();
 
             try (Response response = API_Methods.CLIENT.newCall(request).execute()) {
-                if (response.isSuccessful()) return Result.success();
+                if (response.isSuccessful()) {
+                    prefs.edit().putLong(LAST_SENT, System.currentTimeMillis()).apply();
+                    return Result.success();
+                }
                 Log.w(TAG, "PUT devices: " + response.code());
                 // A 401 has already ended the session. Other 4xx won't change on a retry.
                 return response.code() >= 500 ? Result.retry() : Result.failure();
