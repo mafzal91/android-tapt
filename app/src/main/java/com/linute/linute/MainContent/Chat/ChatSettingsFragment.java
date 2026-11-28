@@ -847,7 +847,5 @@ room: id of room
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mParticipantsAdapter.getRequestManager() != null)
-            mParticipantsAdapter.getRequestManager().onDestroy();
     }
 }

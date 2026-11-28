@@ -294,8 +294,6 @@ public class OverlaysTool extends EditContentTool {
             if (overlay != null)
                 overlay.recycle();
         }
-
-        mRequestManager.onDestroy();
     }
 
     protected static class OverlayItemVH extends RecyclerView.ViewHolder {

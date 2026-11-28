@@ -439,14 +439,6 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-//   TODO     if (mSearchAdapter.getRequestManager() != null) mSearchAdapter.getRequestManager().onDestroy();
-        if (mSelectedAdapter.getRequestManager() != null)
-            mSelectedAdapter.getRequestManager().onDestroy();
-    }
-
     private OnUsersSelectedListener mUsersSelectedListener;
 
     public void setOnUsersSelectedListener(OnUsersSelectedListener listener) {

@@ -290,8 +290,6 @@ public class UpdatesFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mUpdatesAdapter.getRequestManager() != null)
-            mUpdatesAdapter.getRequestManager().onDestroy();
         mUpdatesAdapter.setRequestManager(null);
     }
 

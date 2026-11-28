@@ -360,8 +360,6 @@ public class FriendsListFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mFriendsListAdapter.getRequestManager() != null)
-            mFriendsListAdapter.getRequestManager().onDestroy();
     }
 
     //    public void setEmptyView(View mEmptyView) {
