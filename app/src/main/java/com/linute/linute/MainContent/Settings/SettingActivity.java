@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.API.PushDevices;
 import com.linute.linute.BuildConfig;
 import com.linute.linute.LoginAndSignup.CollegePickerActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
@@ -23,8 +24,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.WebViewActivity;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -194,8 +193,9 @@ public class SettingActivity extends BaseSocketActivity {
             mLogOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
+                    // while the login token still works
+                    PushDevices.unregister(getActivity());
                     //clear saved information
-                    TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:logout", new JSONObject());
                     Utils.resetUserInformation(getActivity()
                             .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                     Utils.deleteTempSharedPreference(getActivity()

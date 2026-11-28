@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Headers;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -54,6 +56,33 @@ public final class PushDevices {
                 .build();
         WorkManager.getInstance(context)
                 .enqueueUniqueWork(REGISTER_WORK, ExistingWorkPolicy.REPLACE, request);
+    }
+
+    /**
+     * Removes this phone's push token from the account with DELETE /devices.
+     * Call it before clearing the login, which the request needs. It doesn't
+     * wait for the answer. If the request fails, the server drops the token
+     * when anyone next logs in on this phone.
+     */
+    public static void unregister(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String token = prefs.getString("userToken", null);
+        if (TextUtils.isEmpty(token)) return;
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("udid", DeviceInfoSingleton.getInstance(context).getUdid());
+        API_Methods.delete("devices", API_Methods.getMainHeader(token), body, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.w(TAG, "DELETE devices failed", e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                if (!response.isSuccessful()) Log.w(TAG, "DELETE devices: " + response.code());
+                response.close();
+            }
+        });
     }
 
     public static class RegisterWorker extends Worker {
