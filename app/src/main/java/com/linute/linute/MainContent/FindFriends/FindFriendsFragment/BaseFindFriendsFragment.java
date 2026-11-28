@@ -142,10 +142,6 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        if (mFriendSearchAdapter.getRequestManager() != null)
-            mFriendSearchAdapter.getRequestManager().onDestroy();
-
         mFriendSearchAdapter.setRequestManager(null);
     }
 

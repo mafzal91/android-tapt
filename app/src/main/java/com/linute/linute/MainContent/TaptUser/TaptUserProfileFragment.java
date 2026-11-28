@@ -650,8 +650,6 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mProfileAdapter.getRequestManager() != null)
-            mProfileAdapter.getRequestManager().onDestroy();
 
         mProfileAdapter.setRequestManager(null);
     }

@@ -594,10 +594,6 @@ public abstract class BaseFeedFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        if (mFeedAdapter.getRequestManager() != null)
-            mFeedAdapter.getRequestManager().onDestroy();
-
         mFeedAdapter.setRequestManager(null);
     }
 }

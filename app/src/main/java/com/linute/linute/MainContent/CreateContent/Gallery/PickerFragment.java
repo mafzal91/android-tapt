@@ -256,9 +256,6 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
             mAlertDialog.dismiss();
             mAlertDialog = null;
         }
-
-        if (mPickerAdapter.getRequestManager() != null)
-            mPickerAdapter.getRequestManager().onDestroy();
     }
 
 

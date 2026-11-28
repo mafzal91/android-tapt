@@ -425,8 +425,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mGlobalChoicesAdapter.getRequestManager() != null)
-            mGlobalChoicesAdapter.getRequestManager().onDestroy();
 
         mGlobalChoicesAdapter.setRequestManager(null);
     }

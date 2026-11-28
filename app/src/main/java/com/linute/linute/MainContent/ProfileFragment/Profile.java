@@ -298,8 +298,6 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mProfileAdapter.getRequestManager() != null)
-            mProfileAdapter.getRequestManager().onDestroy();
 
         mProfileAdapter.setRequestManager(null);
     }

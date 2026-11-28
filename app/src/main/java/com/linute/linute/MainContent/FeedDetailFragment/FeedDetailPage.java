@@ -638,8 +638,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mFeedDetailAdapter.getRequestManager() != null)
-            mFeedDetailAdapter.getRequestManager().onDestroy();
 
         mFeedDetailAdapter.setRequestManager(null);
     }

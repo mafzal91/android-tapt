@@ -1950,7 +1950,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mChatAdapter.getRequestManager() != null) mChatAdapter.getRequestManager().onDestroy();
     }
 
     @Override
