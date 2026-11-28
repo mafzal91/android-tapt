@@ -75,8 +75,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String CHANNEL_ID = "tapt";
 
     /**
-     * Called when the push token is first issued or rotated. The server learns
-     * the token from the socket handshake, so reconnect with the new one.
+     * Called when the push token is first issued or rotated, usually with the
+     * app in the background and no socket. Register it over REST, and give it
+     * to the socket for its next handshake.
      */
     @Override
     public void onNewToken(String token) {
@@ -89,6 +90,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (socket != null) {
             socket.updateDeviceToken(token);
         }
+        PushDevices.register(this);
     }
 
     /**

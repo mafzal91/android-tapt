@@ -151,17 +151,13 @@ public class TaptSocket {
     }
 
 
-    // The server registers the push token from the handshake, so a new token
-    // only reaches it on the next connection.
+    // For the next handshake. PushDevices registers the new token with the
+    // server, so there's no need to reconnect for it.
     public void updateDeviceToken(String deviceToken) {
         if (mSocket == null) return;
         // The socket keeps this map and sends it again on every (re)connect, so
         // change it in place rather than replacing it.
         mOptions.auth.put("deviceToken", nullToEmpty(deviceToken));
-        if (mSocket.connected()) {
-            mSocket.disconnect();
-            mSocket.connect();
-        }
     }
 
     @VisibleForTesting
