@@ -33,6 +33,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.ObjectKey;
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.PushDevices;
 import com.linute.linute.API.SessionExpiry;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
@@ -693,10 +694,13 @@ public class MainActivity extends BaseTaptActivity {
             Log.d(TAG, "call: failed socket connection");
             // Socket.IO 3+ reports a server-side rejection (e.g. the auth
             // middleware) as connect_error with a JSON payload, where the old
-            // protocol sent an "error" event. Transport failures carry an
-            // exception instead and are retried silently, as before.
+            // protocol sent an "error" event. The socket doesn't retry those.
+            // Transport failures carry an exception instead and are retried
+            // silently, as before.
             if (args.length > 0 && args[0] instanceof JSONObject) {
-                if (SessionExpiry.SOCKET_AUTH_ERROR.equals(((JSONObject) args[0]).optString("message"))) {
+                // {message, data: {code}}: no credentials in it
+                Log.w(TAG, "socket refused: " + args[0]);
+                if (SessionExpiry.isSocketAuthError(args[0])) {
                     SessionExpiry.expire();
                 } else {
                     onEventError.call(args);
@@ -1006,7 +1010,7 @@ public class MainActivity extends BaseTaptActivity {
                 //Log.i(TAG, "call: " + body.toString(4));
                 final String text = body.getString("text");
 
-                TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:logout", new JSONObject());
+                PushDevices.unregister(MainActivity.this);
                 Utils.resetUserInformation(getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                 Utils.deleteTempSharedPreference(getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE));
                 TaptSocket.getInstance().forceDisconnect();

@@ -11,16 +11,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.API.PushDevices;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-
-import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -114,7 +112,7 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:logout", new JSONObject());
+                PushDevices.unregister(activity);
                 Utils.resetUserInformation(activity
                         .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                 Utils.deleteTempSharedPreference(activity
