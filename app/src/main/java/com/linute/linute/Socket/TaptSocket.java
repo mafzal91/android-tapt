@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
@@ -18,6 +19,8 @@ import org.json.JSONException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.socket.client.IO;
 import io.socket.client.Manager;
@@ -67,9 +70,14 @@ public class TaptSocket {
                 }
             }
 
-            op.query = "token=" + encode(token) +
-                    "&deviceToken=" + encode(device.getDeviceToken()) +
-                    "&udid=" + encode(device.getUdid()) +
+            // Credentials go in the Socket.IO auth payload, not the URL, which can end
+            // up in proxy logs. The client sends this map on every (re)connect.
+            Map<String, String> auth = new HashMap<>();
+            auth.put("token", token);
+            auth.put("deviceToken", nullToEmpty(device.getDeviceToken()));
+            op.auth = auth;
+
+            op.query = "udid=" + encode(device.getUdid()) +
                     "&version=" + encode(device.getVersionName()) +
                     "&build=" + encode(device.getVersionCode()) +
                     "&os=" + encode(device.getOS()) +
@@ -88,6 +96,10 @@ public class TaptSocket {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     // Query values such as the device model ("Pixel 8") and geo ("[40.7,-74.0]")
@@ -139,16 +151,22 @@ public class TaptSocket {
     }
 
 
-    // The server registers the push token from the handshake query, so a new
-    // token only reaches it on the next connection.
+    // The server registers the push token from the handshake, so a new token
+    // only reaches it on the next connection.
     public void updateDeviceToken(String deviceToken) {
         if (mSocket == null) return;
-        // The Manager reads these options again on every (re)connect.
-        mOptions.query = mOptions.query.replaceFirst("deviceToken=[^&]*", "deviceToken=" + encode(deviceToken));
+        // The socket keeps this map and sends it again on every (re)connect, so
+        // change it in place rather than replacing it.
+        mOptions.auth.put("deviceToken", nullToEmpty(deviceToken));
         if (mSocket.connected()) {
             mSocket.disconnect();
             mSocket.connect();
         }
+    }
+
+    @VisibleForTesting
+    public IO.Options getOptions() {
+        return mOptions;
     }
 
     public static TaptSocket getInstance() {
