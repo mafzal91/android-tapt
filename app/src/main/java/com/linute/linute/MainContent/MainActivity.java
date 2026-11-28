@@ -693,10 +693,11 @@ public class MainActivity extends BaseTaptActivity {
             Log.d(TAG, "call: failed socket connection");
             // Socket.IO 3+ reports a server-side rejection (e.g. the auth
             // middleware) as connect_error with a JSON payload, where the old
-            // protocol sent an "error" event. Transport failures carry an
-            // exception instead and are retried silently, as before.
+            // protocol sent an "error" event. The socket doesn't retry those.
+            // Transport failures carry an exception instead and are retried
+            // silently, as before.
             if (args.length > 0 && args[0] instanceof JSONObject) {
-                if (SessionExpiry.SOCKET_AUTH_ERROR.equals(((JSONObject) args[0]).optString("message"))) {
+                if (SessionExpiry.isSocketAuthError(args[0])) {
                     SessionExpiry.expire();
                 } else {
                     onEventError.call(args);
